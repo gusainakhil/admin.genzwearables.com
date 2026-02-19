@@ -28,10 +28,15 @@ class CategoryController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:150',
             'parent_id' => 'nullable|exists:categories,id',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
             'status' => 'required|in:active,inactive',
         ]);
 
         $validated['slug'] = Str::slug($validated['name']);
+
+        if ($request->hasFile('image')) {
+            $validated['image'] = $request->file('image')->store('categories', 'public');
+        }
 
         Category::create($validated);
 
@@ -53,10 +58,19 @@ class CategoryController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:150',
             'parent_id' => 'nullable|exists:categories,id',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
             'status' => 'required|in:active,inactive',
         ]);
 
         $validated['slug'] = Str::slug($validated['name']);
+
+        if ($request->hasFile('image')) {
+            if ($category->image) {
+                \Storage::disk('public')->delete($category->image);
+            }
+
+            $validated['image'] = $request->file('image')->store('categories', 'public');
+        }
 
         $category->update($validated);
 
@@ -66,6 +80,10 @@ class CategoryController extends Controller
 
     public function destroy(Category $category)
     {
+        if ($category->image) {
+            \Storage::disk('public')->delete($category->image);
+        }
+
         $category->delete();
 
         return redirect()->route('admin.categories.index')

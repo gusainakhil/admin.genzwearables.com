@@ -14,6 +14,7 @@ class Category extends Model
         'parent_id',
         'name',
         'slug',
+        'image',
         'status',
     ];
 
@@ -22,6 +23,11 @@ class Category extends Model
         return $this->belongsTo(Category::class, 'parent_id');
     }
 
+    /*************  ✨ Windsurf Command ⭐  *************/
+    /**
+     * Get the immediate children of the category.
+     */
+    /*******  6b31266b-76a7-4e0f-9af2-eb0307e9901d  *******/
     public function children(): HasMany
     {
         return $this->hasMany(Category::class, 'parent_id');

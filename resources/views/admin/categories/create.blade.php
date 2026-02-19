@@ -11,7 +11,7 @@
             <h3 class="mt-1 text-xl font-semibold text-stone-900">Create Category</h3>
         </div>
         <div class="p-6">
-            <form action="{{ route('admin.categories.store') }}" method="POST" class="space-y-5">
+            <form action="{{ route('admin.categories.store') }}" method="POST" enctype="multipart/form-data" class="space-y-5">
                 @csrf
                 
                 <div>
@@ -38,6 +38,12 @@
                         <option value="active" {{ old('status') == 'active' ? 'selected' : '' }}>Active</option>
                         <option value="inactive" {{ old('status') == 'inactive' ? 'selected' : '' }}>Inactive</option>
                     </select>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-stone-500 mb-2">Category Image</label>
+                    <input type="file" name="image" accept="image/*"
+                        class="w-full rounded-2xl border border-rose-200/60 bg-white px-4 py-3 text-sm text-stone-800 shadow-sm focus:border-rose-400 focus:outline-none">
                 </div>
 
                 <div class="flex flex-wrap gap-3">

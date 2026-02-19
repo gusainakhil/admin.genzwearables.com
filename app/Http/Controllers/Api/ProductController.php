@@ -10,6 +10,31 @@ use Illuminate\Http\Request;
 
 class ProductController extends Controller
 {
+    public function random(Request $request)
+    {
+        $limit = (int) $request->query('limit', 10);
+        $limit = max(1, min($limit, 50));
+
+        $products = Product::query()
+            ->where('status', 'active')
+            ->with([
+                'category',
+                'images' => function ($q) {
+                    $q->orderByDesc('is_primary');
+                },
+            ])
+            ->inRandomOrder()
+            ->limit($limit)
+            ->get();
+
+        return response()->json([
+            'status' => true,
+            'data' => $products->map(function (Product $product) {
+                return $this->transformProduct($product);
+            }),
+        ]);
+    }
+
     public function index(Request $request)
     {
         $perPage = (int) $request->query('per_page', 20);
