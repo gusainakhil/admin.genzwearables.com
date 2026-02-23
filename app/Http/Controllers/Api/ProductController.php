@@ -209,17 +209,27 @@ class ProductController extends Controller
         ];
 
         if ($includeVariants) {
-            $data['variants'] = $product->variants->map(function ($variant) {
-                return [
+            $variantsBySize = [];
+
+            foreach ($product->variants as $variant) {
+                $sizeName = $variant->size?->name ?? 'unknown';
+
+                if (! isset($variantsBySize[$sizeName])) {
+                    $variantsBySize[$sizeName] = [];
+                }
+
+                $variantsBySize[$sizeName][] = [
                     'id' => $variant->id,
                     'sku' => $variant->sku,
                     'price' => $variant->price,
                     'stock_qty' => $variant->stock_qty,
                     'status' => $variant->status,
-                    'size' => $variant->size,
-                    'color' => $variant->color,
+                    'color_name' => $variant->color?->name,
+                    'color_hex_code' => $variant->color?->hex_code,
                 ];
-            });
+            }
+
+            $data['variants'] = $variantsBySize;
         }
 
         if ($includeReviews) {
