@@ -12,6 +12,7 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Payment;
 use App\Models\ProductVariant;
+use App\Models\UserAddress;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -65,6 +66,20 @@ class OrderController extends Controller
             'items.variant.color',
         ]);
 
+        $address = $order->address_snapshot;
+
+        if (! $address && $order->address) {
+            $address = [
+                'name' => $order->address->name,
+                'phone' => $order->address->phone,
+                'address' => $order->address->address,
+                'city' => $order->address->city,
+                'state' => $order->address->state,
+                'pincode' => $order->address->pincode,
+                'country' => $order->address->country,
+            ];
+        }
+
         $items = $order->items->map(function (OrderItem $item) {
             $product = $item->product;
             $variant = $item->variant;
@@ -113,7 +128,7 @@ class OrderController extends Controller
                 'total' => $order->total,
                 'payment_status' => $order->payment_status,
                 'order_status' => $order->order_status,
-                'address' => $order->address,
+                'address' => $address,
                 'payment' => $order->payment,
                 'items' => $items,
                 'created_at' => $order->created_at,
@@ -124,6 +139,18 @@ class OrderController extends Controller
     public function store(StoreOrderRequest $request): JsonResponse
     {
         $validated = $request->validated();
+
+        $selectedAddress = UserAddress::query()
+            ->where('user_id', $request->user()->id)
+            ->whereKey($validated['address_id'])
+            ->first();
+
+        if (! $selectedAddress) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Address not found',
+            ], 422);
+        }
 
         $cart = Cart::with(['items.productVariant.product'])
             ->where('user_id', $request->user()->id)
@@ -166,10 +193,18 @@ class OrderController extends Controller
         $discount = 0;
         $total = $subtotal + $shipping - $discount;
 
-        $order = DB::transaction(function () use ($cart, $validated, $subtotal, $shipping, $discount, $total) {
+        $order = DB::transaction(function () use ($cart, $validated, $subtotal, $shipping, $discount, $total, $selectedAddress) {
             $order = Order::create([
                 'user_id' => $cart->user_id,
-                'address_id' => $validated['address_id'],
+                'address_snapshot' => [
+                    'name' => $selectedAddress->name,
+                    'phone' => $selectedAddress->phone,
+                    'address' => $selectedAddress->address,
+                    'city' => $selectedAddress->city,
+                    'state' => $selectedAddress->state,
+                    'pincode' => $selectedAddress->pincode,
+                    'country' => $selectedAddress->country,
+                ],
                 'order_number' => $this->generateOrderNumber(),
                 'subtotal' => $subtotal,
                 'shipping' => $shipping,
@@ -225,12 +260,21 @@ class OrderController extends Controller
         $validated = $request->validated();
 
         if ($order->payment_status === 'paid') {
+            $order->load(['items.variant']);
+            $itemStocks = $order->items->map(function (OrderItem $item) {
+                return [
+                    'product_variant_id' => $item->product_variant_id,
+                    'stock_qty' => $item->variant?->stock_qty,
+                ];
+            });
+
             return response()->json([
                 'status' => true,
                 'message' => 'Order already paid',
                 'data' => [
                     'id' => $order->id,
                     'payment_status' => $order->payment_status,
+                    'items' => $itemStocks,
                 ],
             ]);
         }
@@ -311,12 +355,22 @@ class OrderController extends Controller
             Mail::to($order->user->email)->send(new OrderPaid($order));
         }
 
+        $order->load(['items.variant']);
+
+        $itemStocks = $order->items->map(function (OrderItem $item) {
+            return [
+                'product_variant_id' => $item->product_variant_id,
+                'stock_qty' => $item->variant?->stock_qty,
+            ];
+        });
+
         return response()->json([
             'status' => true,
             'message' => 'Payment status updated',
             'data' => [
                 'id' => $order->id,
                 'payment_status' => $order->payment_status,
+                'items' => $itemStocks,
             ],
         ]);
     }

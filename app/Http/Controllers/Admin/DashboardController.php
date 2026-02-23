@@ -16,6 +16,9 @@ class DashboardController extends Controller
             'total_products' => Product::count(),
             'total_orders' => Order::count(),
             'total_revenue' => Order::where('payment_status', 'paid')->sum('total'),
+            'paid_not_shipped' => Order::where('payment_status', 'paid')
+                ->whereIn('order_status', ['placed', 'packed'])
+                ->count(),
             'pending_orders' => Order::where('order_status', 'placed')->count(),
             'recent_orders' => Order::with('user')->latest()->take(10)->get(),
         ];

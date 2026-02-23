@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\ReviewController;
+use App\Http\Controllers\Admin\SettingsController;
 use App\Http\Controllers\Auth\LoginController;
 use Illuminate\Support\Facades\Route;
 
@@ -59,4 +60,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
     // Reviews
     Route::get('reviews', [ReviewController::class, 'index'])->name('reviews.index');
     Route::delete('reviews/{review}', [ReviewController::class, 'destroy'])->name('reviews.destroy');
+
+    // Settings
+    Route::get('settings', [SettingsController::class, 'index'])->name('settings.index');
+    Route::post('settings', [SettingsController::class, 'update'])->name('settings.update');
 });

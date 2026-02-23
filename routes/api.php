@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CartController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\OrderController;
+use App\Http\Controllers\Api\PaymentController;
 use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\UserAddressController;
 use App\Http\Controllers\Api\WishlistController;
@@ -15,6 +16,8 @@ Route::prefix('auth')->group(function () {
     Route::middleware('auth:sanctum')->post('/logout', [AuthController::class, 'logout']);
     Route::middleware('auth:sanctum')->get('/me', [AuthController::class, 'me']);
 });
+
+Route::get('/payment/config', [PaymentController::class, 'config']);
 
 Route::get('/categories', [CategoryController::class, 'index']);
 Route::get('/categories/{category}', [CategoryController::class, 'show']);

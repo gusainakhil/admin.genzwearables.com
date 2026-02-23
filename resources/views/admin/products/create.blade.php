@@ -62,6 +62,55 @@
                     <div id="description-editor" class="bg-white border border-rose-200/60 rounded-2xl min-h-[200px] mb-4"></div>
                     <textarea name="description" id="description-input" class="hidden">{!! old('description') !!}</textarea>
                 </div>
+                <br>
+
+                <!-- SEO & OG Meta Tags -->
+                <div class="col-span-2 rounded-2xl border border-amber-200/60 bg-amber-50/30 p-6 mt-4">
+                    <h4 class="text-sm font-semibold text-stone-900 mb-4 flex items-center gap-2">
+                        <i class="fas fa-search text-amber-600"></i>
+                        SEO & Social Media Meta Tags
+                    </h4>
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="col-span-2">
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-stone-500 mb-2">Meta Title</label>
+                            <input type="text" name="meta_title" value="{{ old('meta_title') }}" maxlength="255"
+                                placeholder="SEO optimized title (60 chars recommended)"
+                                class="w-full rounded-2xl border border-rose-200/60 bg-white px-4 py-2 text-sm text-stone-800 shadow-sm focus:border-rose-400 focus:outline-none">
+                        </div>
+
+                        <div class="col-span-2">
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-stone-500 mb-2">Meta Description</label>
+                            <textarea name="meta_description" rows="3" maxlength="500"
+                                placeholder="SEO meta description (160 chars recommended)"
+                                class="w-full rounded-2xl border border-rose-200/60 bg-white px-4 py-2 text-sm text-stone-800 shadow-sm focus:border-rose-400 focus:outline-none">{{ old('meta_description') }}</textarea>
+                        </div>
+
+                        <div class="col-span-2">
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-stone-500 mb-2">Open Graph Title</label>
+                            <input type="text" name="og_title" value="{{ old('og_title') }}" maxlength="255"
+                                placeholder="Title for social media sharing (Facebook, LinkedIn, etc.)"
+                                class="w-full rounded-2xl border border-rose-200/60 bg-white px-4 py-2 text-sm text-stone-800 shadow-sm focus:border-rose-400 focus:outline-none">
+                        </div>
+
+                        <div class="col-span-2">
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-stone-500 mb-2">Open Graph Description</label>
+                            <textarea name="og_description" rows="3" maxlength="500"
+                                placeholder="Description for social media sharing"
+                                class="w-full rounded-2xl border border-rose-200/60 bg-white px-4 py-2 text-sm text-stone-800 shadow-sm focus:border-rose-400 focus:outline-none">{{ old('og_description') }}</textarea>
+                        </div>
+
+                        <div class="col-span-2">
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-stone-500 mb-2">Open Graph Image URL</label>
+                            <input type="text" name="og_image" value="{{ old('og_image') }}" maxlength="500"
+                                placeholder="https://example.com/image.jpg (1200x630px recommended)"
+                                class="w-full rounded-2xl border border-rose-200/60 bg-white px-4 py-2 text-sm text-stone-800 shadow-sm focus:border-rose-400 focus:outline-none">
+                            <p class="mt-1 text-xs text-stone-500">
+                                <i class="fas fa-info-circle"></i> Full URL of the image to show when shared on social media
+                            </p>
+                        </div>
+                    </div>
+                </div>
 
                 <div class="mt-14">
                     <label class="block text-xs font-semibold uppercase tracking-wider text-stone-500 mb-2">Status</label>

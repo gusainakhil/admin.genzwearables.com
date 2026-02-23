@@ -44,6 +44,11 @@ class ProductController extends Controller
             'gender' => 'nullable|in:men,women,kids,unisex',
             'is_custom' => 'boolean',
             'status' => 'required|in:active,inactive',
+            'meta_title' => 'nullable|string|max:255',
+            'meta_description' => 'nullable|string',
+            'og_title' => 'nullable|string|max:255',
+            'og_description' => 'nullable|string',
+            'og_image' => 'nullable|string|max:500',
         ]);
 
         $validated['slug'] = Str::slug($validated['name']);
@@ -77,6 +82,11 @@ class ProductController extends Controller
             'gender' => 'nullable|in:men,women,kids,unisex',
             'is_custom' => 'boolean',
             'status' => 'required|in:active,inactive',
+            'meta_title' => 'nullable|string|max:255',
+            'meta_description' => 'nullable|string',
+            'og_title' => 'nullable|string|max:255',
+            'og_description' => 'nullable|string',
+            'og_image' => 'nullable|string|max:500',
         ]);
 
         $validated['slug'] = Str::slug($validated['name']);

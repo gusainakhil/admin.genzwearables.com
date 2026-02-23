@@ -87,15 +87,30 @@
     </div>
 
     <!-- Shipping Address -->
-    @if($order->address)
+    @php
+        $shippingAddress = $order->address_snapshot ?? null;
+
+        if (! $shippingAddress && $order->address) {
+            $shippingAddress = [
+                'name' => $order->address->name,
+                'phone' => $order->address->phone,
+                'address' => $order->address->address,
+                'city' => $order->address->city,
+                'state' => $order->address->state,
+                'pincode' => $order->address->pincode,
+                'country' => $order->address->country,
+            ];
+        }
+    @endphp
+    @if($shippingAddress)
     <div class="rounded-[28px] border border-rose-200/60 bg-white shadow-sm p-6">
         <h3 class="text-lg font-semibold text-stone-900 mb-4">Shipping Address</h3>
         <p class="text-stone-700">
-            {{ $order->address->name }}<br>
-            {{ $order->address->address }}<br>
-            {{ $order->address->city }}, {{ $order->address->state }} {{ $order->address->pincode }}<br>
-            {{ $order->address->country }}<br>
-            Phone: {{ $order->address->phone }}
+            {{ $shippingAddress['name'] ?? 'N/A' }}<br>
+            {{ $shippingAddress['address'] ?? 'N/A' }}<br>
+            {{ $shippingAddress['city'] ?? 'N/A' }}, {{ $shippingAddress['state'] ?? 'N/A' }} {{ $shippingAddress['pincode'] ?? '' }}<br>
+            {{ $shippingAddress['country'] ?? 'N/A' }}<br>
+            Phone: {{ $shippingAddress['phone'] ?? 'N/A' }}
         </p>
     </div>
     @endif

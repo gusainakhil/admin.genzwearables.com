@@ -27,7 +27,7 @@
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
-        <div class="relative overflow-hidden rounded-[26px] border border-rose-200/60 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow">
+        <!-- <div class="relative overflow-hidden rounded-[26px] border border-rose-200/60 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow">
             <div class="absolute right-0 top-0 h-24 w-24 -translate-y-6 translate-x-6 rounded-full bg-gradient-to-br from-rose-200/80 to-amber-100/60 blur-2xl"></div>
             <div class="p-6">
                 <div class="flex items-center justify-between">
@@ -42,7 +42,24 @@
                 </div>
             </div>
             <div class="h-1.5 w-full bg-gradient-to-r from-rose-500 via-rose-400 to-amber-300"></div>
-        </div>
+        </div> -->
+
+            <div class="relative overflow-hidden rounded-[26px] border border-rose-200/60 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow">
+                <div class="absolute right-0 top-0 h-24 w-24 -translate-y-6 translate-x-6 rounded-full bg-gradient-to-br from-amber-200/80 to-rose-100/60 blur-2xl"></div>
+                <div class="p-6">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-[0.65rem] uppercase tracking-[0.35em] text-stone-500">Paid Not Shipped</p>
+                            <p class="mt-3 text-4xl font-semibold text-stone-900">{{ $stats['paid_not_shipped'] }}</p>
+                            <p class="mt-2 text-xs font-semibold text-rose-600">Needs dispatch</p>
+                        </div>
+                        <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-500 to-rose-500 text-white shadow-sm">
+                            <i class="fas fa-truck text-2xl"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="h-1.5 w-full bg-gradient-to-r from-amber-500 via-rose-500 to-rose-300"></div>
+            </div>
 
         <div class="relative overflow-hidden rounded-[26px] border border-rose-200/60 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow">
             <div class="absolute right-0 top-0 h-24 w-24 -translate-y-6 translate-x-6 rounded-full bg-gradient-to-br from-amber-200/80 to-rose-100/60 blur-2xl"></div>

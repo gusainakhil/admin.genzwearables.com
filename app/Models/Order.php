@@ -12,6 +12,7 @@ class Order extends Model
     protected $fillable = [
         'user_id',
         'address_id',
+        'address_snapshot',
         'order_number',
         'subtotal',
         'shipping',
@@ -22,6 +23,7 @@ class Order extends Model
     ];
 
     protected $casts = [
+        'address_snapshot' => 'array',
         'subtotal' => 'decimal:2',
         'shipping' => 'decimal:2',
         'discount' => 'decimal:2',

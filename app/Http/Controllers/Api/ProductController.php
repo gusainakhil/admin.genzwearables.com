@@ -197,6 +197,15 @@ class ProductController extends Controller
             'status' => $product->status,
             'category' => $product->category,
             'images' => $images,
+            'meta' => [
+                'title' => $product->meta_title,
+                'description' => $product->meta_description,
+            ],
+            'og' => [
+                'title' => $product->og_title,
+                'description' => $product->og_description,
+                'image' => $product->og_image,
+            ],
         ];
 
         if ($includeVariants) {
