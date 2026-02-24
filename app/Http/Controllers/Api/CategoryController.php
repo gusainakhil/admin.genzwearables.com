@@ -17,7 +17,7 @@ class CategoryController extends Controller
 
         return response()->json([
             'status' => true,
-            'data' => $categories,
+            'data' => $categories->map(fn (Category $category) => $this->transformCategory($category)),
         ]);
     }
 
@@ -27,7 +27,21 @@ class CategoryController extends Controller
 
         return response()->json([
             'status' => true,
-            'data' => $category,
+            'data' => $this->transformCategory($category),
         ]);
+    }
+
+    private function transformCategory(Category $category): array
+    {
+        return [
+            'id' => $category->id,
+            'parent_id' => $category->parent_id,
+            'name' => $category->name,
+            'slug' => $category->slug,
+            'image' => $category->image,
+            'image_url' => $category->image ? asset('storage/'.$category->image) : null,
+            'status' => $category->status,
+            'children' => $category->children->map(fn (Category $child) => $this->transformCategory($child))->values(),
+        ];
     }
 }
