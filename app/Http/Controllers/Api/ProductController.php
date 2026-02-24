@@ -22,6 +22,7 @@ class ProductController extends Controller
                 'images' => function ($q) {
                     $q->orderByDesc('is_primary');
                 },
+                'reviews.user',
             ])
             ->inRandomOrder()
             ->limit($limit)
@@ -30,7 +31,7 @@ class ProductController extends Controller
         return response()->json([
             'status' => true,
             'data' => $products->map(function (Product $product) {
-                return $this->transformProduct($product);
+                return $this->transformProduct($product, false, true);
             }),
         ]);
     }
