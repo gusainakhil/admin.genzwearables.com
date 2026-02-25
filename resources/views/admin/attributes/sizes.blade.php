@@ -32,7 +32,6 @@
                     <tr>
                         <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-stone-500">ID</th>
                         <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-stone-500">Name</th>
-                        <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-stone-500">Actions</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-rose-100/70">
@@ -40,19 +39,10 @@
                     <tr class="transition hover:bg-rose-50/60">
                         <td class="px-6 py-4 whitespace-nowrap text-stone-600">{{ $size->id }}</td>
                         <td class="px-6 py-4 whitespace-nowrap font-semibold text-stone-900">{{ $size->name }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <form action="{{ route('admin.sizes.destroy', $size) }}" method="POST" class="inline" onsubmit="return confirm('Delete this size?')">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="text-rose-600 transition hover:text-rose-700">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </form>
-                        </td>
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="3" class="px-6 py-4 text-center text-stone-500">No sizes found</td>
+                        <td colspan="2" class="px-6 py-4 text-center text-stone-500">No sizes found</td>
                     </tr>
                     @endforelse
                 </tbody>
