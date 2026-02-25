@@ -47,6 +47,7 @@ class ProductController extends Controller
                 'images' => function ($q) {
                     $q->orderByDesc('is_primary');
                 },
+                'reviews.user',
             ]);
 
         if ($request->filled('category_id')) {
@@ -79,7 +80,7 @@ class ProductController extends Controller
         $products = $query->paginate($perPage);
 
         $products->getCollection()->transform(function (Product $product) {
-            return $this->transformProduct($product);
+            return $this->transformProduct($product, false, true);
         });
 
         return response()->json([

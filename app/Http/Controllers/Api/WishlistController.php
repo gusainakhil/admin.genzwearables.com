@@ -13,7 +13,7 @@ class WishlistController extends Controller
     {
         $items = Wishlist::with(['product.images' => function ($q) {
             $q->orderByDesc('is_primary');
-        }, 'product.category'])
+        }, 'product.category', 'product.reviews.user'])
             ->where('user_id', $request->user()->id)
             ->get()
             ->map(function (Wishlist $wishlist) {
@@ -41,6 +41,18 @@ class WishlistController extends Controller
                         'status' => $product->status,
                         'category' => $product->category,
                         'images' => $images,
+                        'reviews' => $product->reviews->map(function ($review) {
+                            return [
+                                'id' => $review->id,
+                                'rating' => $review->rating,
+                                'comment' => $review->comment,
+                                'user' => $review->user ? [
+                                    'id' => $review->user->id,
+                                    'name' => $review->user->name,
+                                ] : null,
+                                'created_at' => $review->created_at,
+                            ];
+                        }),
                     ] : null,
                 ];
             });

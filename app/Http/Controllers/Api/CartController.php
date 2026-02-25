@@ -19,6 +19,7 @@ class CartController extends Controller
             'items.productVariant.product.images' => function ($q) {
                 $q->orderByDesc('is_primary');
             },
+            'items.productVariant.product.reviews.user',
             'items.productVariant.size',
             'items.productVariant.color',
         ])
@@ -65,6 +66,18 @@ class CartController extends Controller
                         'brand' => $product->brand,
                         'base_price' => $product->base_price,
                         'images' => $images,
+                        'reviews' => $product->reviews->map(function ($review) {
+                            return [
+                                'id' => $review->id,
+                                'rating' => $review->rating,
+                                'comment' => $review->comment,
+                                'user' => $review->user ? [
+                                    'id' => $review->user->id,
+                                    'name' => $review->user->name,
+                                ] : null,
+                                'created_at' => $review->created_at,
+                            ];
+                        }),
                     ] : null,
                 ] : null,
             ];
@@ -129,7 +142,7 @@ class CartController extends Controller
             $wasCreated = true;
         }
 
-        $cartItem->load(['productVariant.product', 'productVariant.size', 'productVariant.color']);
+        $cartItem->load(['productVariant.product.reviews.user', 'productVariant.size', 'productVariant.color']);
 
         return response()->json([
             'status' => true,
@@ -145,7 +158,31 @@ class CartController extends Controller
                     'status' => $cartItem->productVariant->status,
                     'size' => $cartItem->productVariant->size,
                     'color' => $cartItem->productVariant->color,
-                    'product' => $cartItem->productVariant->product,
+                    'product' => $cartItem->productVariant->product ? [
+                        'id' => $cartItem->productVariant->product->id,
+                        'category_id' => $cartItem->productVariant->product->category_id,
+                        'name' => $cartItem->productVariant->product->name,
+                        'slug' => $cartItem->productVariant->product->slug,
+                        'short_description' => $cartItem->productVariant->product->short_description,
+                        'description' => $cartItem->productVariant->product->description,
+                        'brand' => $cartItem->productVariant->product->brand,
+                        'base_price' => $cartItem->productVariant->product->base_price,
+                        'gender' => $cartItem->productVariant->product->gender,
+                        'is_custom' => (bool) $cartItem->productVariant->product->is_custom,
+                        'status' => $cartItem->productVariant->product->status,
+                        'reviews' => $cartItem->productVariant->product->reviews->map(function ($review) {
+                            return [
+                                'id' => $review->id,
+                                'rating' => $review->rating,
+                                'comment' => $review->comment,
+                                'user' => $review->user ? [
+                                    'id' => $review->user->id,
+                                    'name' => $review->user->name,
+                                ] : null,
+                                'created_at' => $review->created_at,
+                            ];
+                        }),
+                    ] : null,
                 ] : null,
             ],
         ], $wasCreated ? 201 : 200);
@@ -172,7 +209,7 @@ class CartController extends Controller
         $item->quantity = $validated['quantity'];
         $item->save();
 
-        $item->load(['productVariant.product', 'productVariant.size', 'productVariant.color']);
+        $item->load(['productVariant.product.reviews.user', 'productVariant.size', 'productVariant.color']);
 
         return response()->json([
             'status' => true,
@@ -188,7 +225,31 @@ class CartController extends Controller
                     'status' => $item->productVariant->status,
                     'size' => $item->productVariant->size,
                     'color' => $item->productVariant->color,
-                    'product' => $item->productVariant->product,
+                    'product' => $item->productVariant->product ? [
+                        'id' => $item->productVariant->product->id,
+                        'category_id' => $item->productVariant->product->category_id,
+                        'name' => $item->productVariant->product->name,
+                        'slug' => $item->productVariant->product->slug,
+                        'short_description' => $item->productVariant->product->short_description,
+                        'description' => $item->productVariant->product->description,
+                        'brand' => $item->productVariant->product->brand,
+                        'base_price' => $item->productVariant->product->base_price,
+                        'gender' => $item->productVariant->product->gender,
+                        'is_custom' => (bool) $item->productVariant->product->is_custom,
+                        'status' => $item->productVariant->product->status,
+                        'reviews' => $item->productVariant->product->reviews->map(function ($review) {
+                            return [
+                                'id' => $review->id,
+                                'rating' => $review->rating,
+                                'comment' => $review->comment,
+                                'user' => $review->user ? [
+                                    'id' => $review->user->id,
+                                    'name' => $review->user->name,
+                                ] : null,
+                                'created_at' => $review->created_at,
+                            ];
+                        }),
+                    ] : null,
                 ] : null,
             ],
         ]);
