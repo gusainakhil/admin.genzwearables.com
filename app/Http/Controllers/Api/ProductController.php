@@ -103,8 +103,9 @@ class ProductController extends Controller
             'images' => function ($q) {
                 $q->orderByDesc('is_primary');
             },
-            'variants.size',
-            'variants.color',
+            'variants' => function ($q) {
+                $q->where('status', 'active')->with(['size', 'color']);
+            },
             'reviews.user',
         ]);
 
@@ -213,7 +214,7 @@ class ProductController extends Controller
         if ($includeVariants) {
             $variantsBySize = [];
 
-            foreach ($product->variants as $variant) {
+            foreach ($product->variants->where('status', 'active') as $variant) {
                 $sizeName = $variant->size?->name ?? 'unknown';
 
                 if (! isset($variantsBySize[$sizeName])) {
