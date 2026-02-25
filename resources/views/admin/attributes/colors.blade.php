@@ -22,8 +22,8 @@
                 </div>
                 <div class="w-40">
                     <label class="block text-xs font-semibold uppercase tracking-wider text-stone-500 mb-2">Hex Code</label>
-                    <input type="text" name="hex_code" placeholder="#000000" 
-                        class="w-full rounded-2xl border border-rose-200/60 bg-white px-4 py-3 text-sm text-stone-800 shadow-sm focus:border-rose-400 focus:outline-none">
+                    <input type="color" name="hex_code" value="{{ old('hex_code', '#000000') }}"
+                        class="h-11 w-full rounded-2xl border border-rose-200/60 bg-white px-2 py-2 text-sm text-stone-800 shadow-sm focus:border-rose-400 focus:outline-none">
                 </div>
                 <button type="submit" class="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-rose-500 to-amber-500 px-6 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-white shadow-sm transition hover:from-rose-600 hover:to-amber-600">
                     <i class="fas fa-plus"></i>Add Color
@@ -38,7 +38,6 @@
                         <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-stone-500">ID</th>
                         <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-stone-500">Color</th>
                         <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-stone-500">Hex Code</th>
-                        <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-stone-500">Actions</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-rose-100/70">
@@ -47,26 +46,15 @@
                         <td class="px-6 py-4 whitespace-nowrap text-stone-600">{{ $color->id }}</td>
                         <td class="px-6 py-4 whitespace-nowrap">
                             <span class="inline-flex items-center">
-                                @if($color->hex_code)
-                                    <span class="w-6 h-6 rounded-full border border-rose-100 mr-3" style="background-color: {{ $color->hex_code }}"></span>
-                                @endif
+                                <span class="w-6 h-6 rounded-full border border-rose-100 mr-3" style="background-color: {{ $color->hex_code ?: '#e7e5e4' }}"></span>
                                 <span class="font-semibold text-stone-900">{{ $color->name }}</span>
                             </span>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-stone-500">{{ $color->hex_code ?? 'N/A' }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <form action="{{ route('admin.colors.destroy', $color) }}" method="POST" class="inline" onsubmit="return confirm('Delete this color?')">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="text-rose-600 transition hover:text-rose-700">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </form>
-                        </td>
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="4" class="px-6 py-4 text-center text-stone-500">No colors found</td>
+                        <td colspan="3" class="px-6 py-4 text-center text-stone-500">No colors found</td>
                     </tr>
                     @endforelse
                 </tbody>
