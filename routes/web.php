@@ -33,6 +33,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
     Route::post('products/{product}/images', [ProductController::class, 'addImage'])->name('products.images.store');
     Route::delete('product-images/{image}', [ProductController::class, 'deleteImage'])->name('products.images.destroy');
     Route::post('products/{product}/variants', [ProductController::class, 'addVariant'])->name('products.variants.store');
+    Route::patch('product-variants/{variant}/status', [ProductController::class, 'updateVariantStatus'])->name('products.variants.status');
     Route::delete('product-variants/{variant}', [ProductController::class, 'deleteVariant'])->name('products.variants.destroy');
 
     // Orders

@@ -264,11 +264,12 @@
                         </span>
                     </td>
                     <td class="px-4 py-3">
-                        <form action="{{ route('admin.products.variants.destroy', $variant) }}" method="POST" onsubmit="return confirm('Delete this variant?')">
+                        <form action="{{ route('admin.products.variants.status', $variant) }}" method="POST" onsubmit="return confirm('Update variant status?')">
                             @csrf
-                            @method('DELETE')
-                            <button type="submit" class="text-rose-600 transition hover:text-rose-700">
-                                <i class="fas fa-trash"></i>
+                            @method('PATCH')
+                            <input type="hidden" name="status" value="{{ $variant->status === 'active' ? 'inactive' : 'active' }}">
+                            <button type="submit" class="rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.12em] {{ $variant->status === 'active' ? 'bg-rose-100 text-rose-700 hover:bg-rose-200' : 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200' }} transition">
+                                {{ $variant->status === 'active' ? 'Deactivate' : 'Activate' }}
                             </button>
                         </form>
                     </td>

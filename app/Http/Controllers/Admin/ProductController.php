@@ -155,8 +155,23 @@ class ProductController extends Controller
 
     public function deleteVariant(ProductVariant $variant)
     {
-        $variant->delete();
+        $variant->update([
+            'status' => 'inactive',
+        ]);
 
-        return back()->with('success', 'Variant deleted successfully');
+        return back()->with('success', 'Variant deactivated successfully');
+    }
+
+    public function updateVariantStatus(Request $request, ProductVariant $variant)
+    {
+        $validated = $request->validate([
+            'status' => 'required|in:active,inactive',
+        ]);
+
+        $variant->update([
+            'status' => $validated['status'],
+        ]);
+
+        return back()->with('success', 'Variant status updated successfully');
     }
 }
