@@ -79,10 +79,18 @@
                     {{ $order->created_at->format('M d, Y') }}
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
-                    <a href="{{ route('admin.orders.show', $order) }}" class="inline-flex items-center gap-2 text-sm font-semibold text-rose-600 transition hover:text-rose-700">
-                        View Details
-                        <i class="fas fa-arrow-right text-xs"></i>
-                    </a>
+                    <div class="flex flex-col items-start gap-1.5">
+                        <a href="{{ route('admin.orders.show', $order) }}" class="inline-flex items-center gap-2 text-sm font-semibold text-rose-600 transition hover:text-rose-700">
+                            View Details
+                            <i class="fas fa-arrow-right text-xs"></i>
+                        </a>
+                        <a href="{{ route('admin.orders.print-invoice', $order) }}" target="_blank" class="text-xs font-semibold text-stone-700 underline-offset-2 transition hover:text-stone-900 hover:underline">
+                            Print Invoice
+                        </a>
+                        <a href="{{ route('admin.orders.print-parcel-sheet', $order) }}" target="_blank" class="text-xs font-semibold text-stone-700 underline-offset-2 transition hover:text-stone-900 hover:underline">
+                            Print Parcel Sheet
+                        </a>
+                    </div>
                 </td>
             </tr>
             @empty

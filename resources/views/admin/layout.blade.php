@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@yield('title', 'Admin Panel') - GenZ Wearables</title>
+    <title>@yield('title', 'Admin Panel') - {{ $companyDetail?->brand_name ?? 'GenZ Wearables' }}</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     @stack('styles')
@@ -33,11 +33,17 @@
         <aside class="admin-sidebar fixed inset-y-0 left-0 z-30 w-72 -translate-x-full bg-gradient-to-b from-stone-950 via-stone-900 to-stone-800 text-white overflow-y-auto transition-transform duration-300 lg:translate-x-0">
             <div class="p-6 border-b border-white/10">
                 <div class="inline-flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
-                    <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-rose-500 to-amber-400 text-stone-900 shadow-sm">
-                        <i class="fas fa-bolt"></i>
-                    </div>
+                    @if($companyDetail?->logo)
+                        <div class="flex h-10 w-10 items-center justify-center overflow-hidden rounded-xl border border-white/10 bg-white shadow-sm">
+                            <img src="{{ asset('storage/' . $companyDetail->logo) }}" alt="{{ $companyDetail->brand_name ?? 'Brand' }} Logo" class="h-full w-full object-contain">
+                        </div>
+                    @else
+                        <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-rose-500 to-amber-400 text-stone-900 shadow-sm">
+                            <i class="fas fa-bolt"></i>
+                        </div>
+                    @endif
                     <div>
-                        <h1 class="text-lg font-semibold tracking-tight">GenZ Wearables</h1>
+                        <h1 class="text-lg font-semibold tracking-tight">{{ $companyDetail?->brand_name ?? 'GenZ Wearables' }}</h1>
                         <p class="text-[0.6rem] uppercase tracking-[0.35em] text-rose-200/80">Admin Panel</p>
                     </div>
                 </div>
@@ -115,6 +121,13 @@
                         <i class="fas fa-cog"></i>
                     </span>
                     Settings
+                </a>
+
+                <a href="{{ route('admin.company-details.index') }}" class="sidebar-link flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold tracking-wide text-stone-200 transition hover:bg-white/10 hover:text-white {{ request()->routeIs('admin.company-details.*') ? 'active' : '' }}">
+                    <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-white/5">
+                        <i class="fas fa-building"></i>
+                    </span>
+                    Company Details
                 </a>
             </nav>
         </aside>

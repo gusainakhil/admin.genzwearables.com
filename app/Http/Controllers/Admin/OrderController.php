@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\CompanyDetail;
 use App\Models\Order;
 use App\Models\Shipment;
 use Illuminate\Http\Request;
@@ -73,5 +74,28 @@ class OrderController extends Controller
         $order->update(['order_status' => 'shipped']);
 
         return back()->with('success', 'Shipment details added successfully');
+    }
+
+    public function printInvoice(Order $order)
+    {
+        $order->load('user', 'address', 'items.product', 'items.variant.size', 'items.variant.color', 'payment', 'shipment');
+        $companyDetail = CompanyDetail::query()->first();
+
+        return view('admin.orders.print-invoice', compact('order', 'companyDetail'));
+    }
+
+    public function printParcelSheet(Order $order)
+    {
+        $order->load('user', 'address', 'items.product', 'items.variant.size', 'items.variant.color', 'payment', 'shipment');
+        $companyDetail = CompanyDetail::query()->first();
+
+        $scanPayload = json_encode([
+            'order_number' => $order->order_number,
+            'tracking_number' => $order->shipment?->tracking_number,
+            'customer' => $order->user->name,
+            'total' => (float) $order->total,
+        ]);
+
+        return view('admin.orders.print-parcel-sheet', compact('order', 'scanPayload', 'companyDetail'));
     }
 }

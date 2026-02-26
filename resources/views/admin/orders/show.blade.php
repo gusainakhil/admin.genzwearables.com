@@ -11,6 +11,15 @@
         </a>
     </div>
 
+    <div class="flex flex-wrap gap-3">
+        <a href="{{ route('admin.orders.print-invoice', $order) }}" target="_blank" class="inline-flex items-center rounded-full border border-rose-200/70 bg-white px-5 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-stone-600 transition hover:border-rose-300 hover:text-stone-800">
+            Print Invoice
+        </a>
+        <a href="{{ route('admin.orders.print-parcel-sheet', $order) }}" target="_blank" class="inline-flex items-center rounded-full border border-rose-200/70 bg-white px-5 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-stone-600 transition hover:border-rose-300 hover:text-stone-800">
+            Print Parcel Sheet
+        </a>
+    </div>
+
     <!-- Order Info -->
     <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <div class="rounded-[28px] border border-rose-200/60 bg-white shadow-sm p-6">

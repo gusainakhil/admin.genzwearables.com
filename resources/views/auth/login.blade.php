@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Login - GenZ Wearables</title>
+    <title>Admin Login - {{ $companyDetail?->brand_name ?? 'GenZ Wearables' }}</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -63,10 +63,16 @@
         <div class="w-full max-w-md">
             <!-- Header -->
             <div class="text-center mb-8">
-                <div class="inline-flex items-center justify-center w-16 h-16 rounded-full gradient-bg mb-4">
-                    <i class="fas fa-shirt text-2xl text-white"></i>
-                </div>
-                <h1 class="text-4xl font-bold text-white mb-2">GenZ Wearables</h1>
+                @if($companyDetail?->logo)
+                    <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-white p-2 mb-4 shadow-lg">
+                        <img src="{{ asset('storage/' . $companyDetail->logo) }}" alt="{{ $companyDetail->brand_name ?? 'Brand' }} Logo" class="h-full w-full object-contain">
+                    </div>
+                @else
+                    <div class="inline-flex items-center justify-center w-16 h-16 rounded-full gradient-bg mb-4">
+                        <i class="fas fa-shirt text-2xl text-white"></i>
+                    </div>
+                @endif
+                <h1 class="text-4xl font-bold text-white mb-2">{{ $companyDetail?->brand_name ?? 'GenZ Wearables' }}</h1>
                 <p class="text-gray-400 text-sm">Admin Dashboard</p>
             </div>
 
@@ -113,7 +119,7 @@
                                 type="email" 
                                 value="{{ old('email') }}" 
                                 required 
-                                placeholder="admin@genzwearables.com"
+                                placeholder="admin@{{ strtolower(str_replace(' ', '', $companyDetail?->brand_name ?? 'genzwearables')) }}.com"
                                 class="input-focus w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none"
                             >
                         </div>
@@ -186,7 +192,7 @@
             <!-- Footer -->
             <div class="mt-8 text-center">
                 <p class="text-gray-500 text-xs">
-                    GenZ Wearables Admin Dashboard &copy; <span id="year"></span>
+                    {{ $companyDetail?->brand_name ?? 'GenZ Wearables' }} Admin Dashboard &copy; <span id="year"></span>
                 </p>
                 <p class="text-gray-600 text-xs mt-2">
                     Secure Admin Portal • v1.0

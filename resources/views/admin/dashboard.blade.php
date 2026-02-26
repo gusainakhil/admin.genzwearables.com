@@ -12,7 +12,14 @@
         <div class="flex flex-col gap-6 px-6 py-9 sm:px-8 lg:flex-row lg:items-center lg:justify-between">
             <div class="space-y-3">
                 <p class="text-[0.65rem] uppercase tracking-[0.45em] text-rose-200/80">Atelier Console</p>
-                <h2 class="text-3xl font-semibold tracking-tight sm:text-4xl">Genz Wearables Dashboard</h2>
+                <div class="flex items-center gap-3">
+                    @if($companyDetail?->logo)
+                        <span class="inline-flex h-12 w-12 items-center justify-center overflow-hidden rounded-xl border border-white/20 bg-white shadow-sm">
+                            <img src="{{ asset('storage/' . $companyDetail->logo) }}" alt="{{ $companyDetail->brand_name ?? 'Brand' }} Logo" class="h-full w-full object-contain">
+                        </span>
+                    @endif
+                    <h2 class="text-3xl font-semibold tracking-tight sm:text-4xl">{{ $companyDetail?->brand_name ?? 'Genz Wearables' }} Dashboard</h2>
+                </div>
                 <p class="max-w-2xl text-sm text-rose-100/80">A warm, premium view of orders, revenue, and customer energy. Your daily pulse, refined.</p>
             </div>
             <div class="flex flex-wrap gap-3">

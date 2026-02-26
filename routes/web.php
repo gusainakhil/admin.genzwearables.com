@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\AttributeController;
 use App\Http\Controllers\Admin\CategoryController;
+use App\Http\Controllers\Admin\CompanyDetailController;
 use App\Http\Controllers\Admin\CouponController;
 use App\Http\Controllers\Admin\CustomerController;
 use App\Http\Controllers\Admin\DashboardController;
@@ -38,6 +39,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
 
     // Orders
     Route::resource('orders', OrderController::class)->only(['index', 'show']);
+    Route::get('orders/{order}/invoice', [OrderController::class, 'printInvoice'])->name('orders.print-invoice');
+    Route::get('orders/{order}/parcel-sheet', [OrderController::class, 'printParcelSheet'])->name('orders.print-parcel-sheet');
     Route::patch('orders/{order}/status', [OrderController::class, 'updateStatus'])->name('orders.status');
     Route::patch('orders/{order}/payment-status', [OrderController::class, 'updatePaymentStatus'])->name('orders.payment-status');
     Route::post('orders/{order}/shipment', [OrderController::class, 'addShipment'])->name('orders.shipment');
@@ -65,4 +68,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
     // Settings
     Route::get('settings', [SettingsController::class, 'index'])->name('settings.index');
     Route::post('settings', [SettingsController::class, 'update'])->name('settings.update');
+
+    // Company Details
+    Route::get('company-details', [CompanyDetailController::class, 'index'])->name('company-details.index');
+    Route::post('company-details', [CompanyDetailController::class, 'update'])->name('company-details.update');
 });
