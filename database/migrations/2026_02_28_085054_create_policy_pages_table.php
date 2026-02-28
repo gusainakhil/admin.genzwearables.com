@@ -11,13 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('policy_pages', function (Blueprint $table) {
-            $table->id();
-            $table->longText('privacy_policy')->nullable();
-            $table->longText('terms_and_conditions')->nullable();
-            $table->longText('return_and_refund')->nullable();
-            $table->timestamps();
-        });
+        if (! Schema::hasTable('policy_pages')) {
+            Schema::create('policy_pages', function (Blueprint $table) {
+                $table->id();
+                $table->longText('privacy_policy')->nullable();
+                $table->longText('terms_and_conditions')->nullable();
+                $table->longText('return_and_refund')->nullable();
+                $table->timestamps();
+            });
+        }
     }
 
     /**

@@ -60,13 +60,6 @@
                     Dashboard
                 </a>
                 
-                <a href="{{ route('admin.categories.index') }}" class="sidebar-link flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold tracking-wide text-stone-200 transition hover:bg-white/10 hover:text-white {{ request()->routeIs('admin.categories.*') ? 'active' : '' }}">
-                    <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-white/5">
-                        <i class="fas fa-folder"></i>
-                    </span>
-                    Categories
-                </a>
-                
                 <a href="{{ route('admin.products.index') }}" class="sidebar-link flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold tracking-wide text-stone-200 transition hover:bg-white/10 hover:text-white {{ request()->routeIs('admin.products.*') ? 'active' : '' }}">
                     <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-white/5">
                         <i class="fas fa-box"></i>
@@ -79,6 +72,21 @@
                         <i class="fas fa-shopping-cart"></i>
                     </span>
                     Orders
+                </a>
+
+                @if(auth()->user()->role === 'admin')
+                <a href="{{ route('admin.staff.index') }}" class="sidebar-link flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold tracking-wide text-stone-200 transition hover:bg-white/10 hover:text-white {{ request()->routeIs('admin.staff.*') ? 'active' : '' }}">
+                    <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-white/5">
+                        <i class="fas fa-user-shield"></i>
+                    </span>
+                    Staff
+                </a>
+
+                <a href="{{ route('admin.categories.index') }}" class="sidebar-link flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold tracking-wide text-stone-200 transition hover:bg-white/10 hover:text-white {{ request()->routeIs('admin.categories.*') ? 'active' : '' }}">
+                    <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-white/5">
+                        <i class="fas fa-folder"></i>
+                    </span>
+                    Categories
                 </a>
                 
                 <a href="{{ route('admin.customers.index') }}" class="sidebar-link flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold tracking-wide text-stone-200 transition hover:bg-white/10 hover:text-white {{ request()->routeIs('admin.customers.*') ? 'active' : '' }}">
@@ -136,6 +144,7 @@
                     </span>
                     Company Details
                 </a>
+                @endif
             </nav>
         </aside>
 

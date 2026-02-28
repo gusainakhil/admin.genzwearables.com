@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Models\CompanyDetail;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
@@ -22,7 +23,13 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         View::composer(['admin.*', 'auth.login'], function ($view): void {
-            $view->with('companyDetail', CompanyDetail::query()->first());
+            $companyDetail = null;
+
+            if (Schema::hasTable('company_details')) {
+                $companyDetail = CompanyDetail::query()->first();
+            }
+
+            $view->with('companyDetail', $companyDetail);
         });
     }
 }

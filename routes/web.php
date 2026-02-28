@@ -11,6 +11,7 @@ use App\Http\Controllers\Admin\PolicyPageController as AdminPolicyPageController
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\ReviewController;
 use App\Http\Controllers\Admin\SettingsController;
+use App\Http\Controllers\Admin\StaffController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\PolicyPageController;
 use Illuminate\Support\Facades\Route;
@@ -29,11 +30,8 @@ Route::get('/terms-and-conditions', [PolicyPageController::class, 'termsAndCondi
 Route::get('/return-and-refund', [PolicyPageController::class, 'returnAndRefund'])->name('return-and-refund');
 
 // Admin Routes
-Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(function () {
+Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin:admin,staff'])->group(function () {
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
-
-    // Categories
-    Route::resource('categories', CategoryController::class);
 
     // Products
     Route::resource('products', ProductController::class);
@@ -51,38 +49,46 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
     Route::patch('orders/{order}/payment-status', [OrderController::class, 'updatePaymentStatus'])->name('orders.payment-status');
     Route::post('orders/{order}/shipment', [OrderController::class, 'addShipment'])->name('orders.shipment');
 
-    // Customers
-    Route::resource('customers', CustomerController::class)->only(['index', 'show']);
-    Route::patch('customers/{customer}/status', [CustomerController::class, 'updateStatus'])->name('customers.status');
+    Route::middleware('admin:admin')->group(function () {
+        // Staff
+        Route::resource('staff', StaffController::class)->except(['show']);
 
-    // Coupons
-    Route::resource('coupons', CouponController::class);
+        // Categories
+        Route::resource('categories', CategoryController::class);
 
-    // Attributes
-    Route::get('sizes', [AttributeController::class, 'sizesIndex'])->name('sizes.index');
-    Route::post('sizes', [AttributeController::class, 'storeSize'])->name('sizes.store');
-    Route::delete('sizes/{size}', [AttributeController::class, 'destroySize'])->name('sizes.destroy');
+        // Customers
+        Route::resource('customers', CustomerController::class)->only(['index', 'show']);
+        Route::patch('customers/{customer}/status', [CustomerController::class, 'updateStatus'])->name('customers.status');
 
-    Route::get('colors', [AttributeController::class, 'colorsIndex'])->name('colors.index');
-    Route::post('colors', [AttributeController::class, 'storeColor'])->name('colors.store');
-    Route::delete('colors/{color}', [AttributeController::class, 'destroyColor'])->name('colors.destroy');
+        // Coupons
+        Route::resource('coupons', CouponController::class);
 
-    // Reviews
-    Route::get('reviews', [ReviewController::class, 'index'])->name('reviews.index');
-    Route::delete('reviews/{review}', [ReviewController::class, 'destroy'])->name('reviews.destroy');
+        // Attributes
+        Route::get('sizes', [AttributeController::class, 'sizesIndex'])->name('sizes.index');
+        Route::post('sizes', [AttributeController::class, 'storeSize'])->name('sizes.store');
+        Route::delete('sizes/{size}', [AttributeController::class, 'destroySize'])->name('sizes.destroy');
 
-    // Settings
-    Route::get('settings', [SettingsController::class, 'index'])->name('settings.index');
-    Route::post('settings', [SettingsController::class, 'update'])->name('settings.update');
-    Route::post('settings/password', [SettingsController::class, 'updatePassword'])->name('settings.password.update');
-    Route::post('settings/shipment-api', [SettingsController::class, 'updateShipmentApiCredentials'])->name('settings.shipment-api.update');
-    Route::post('settings/shipment-api/generate-token', [SettingsController::class, 'generateShipmentApiToken'])->name('settings.shipment-api.generate-token');
+        Route::get('colors', [AttributeController::class, 'colorsIndex'])->name('colors.index');
+        Route::post('colors', [AttributeController::class, 'storeColor'])->name('colors.store');
+        Route::delete('colors/{color}', [AttributeController::class, 'destroyColor'])->name('colors.destroy');
 
-    // Policy Pages
-    Route::get('policies', [AdminPolicyPageController::class, 'index'])->name('policies.index');
-    Route::post('policies', [AdminPolicyPageController::class, 'update'])->name('policies.update');
+        // Reviews
+        Route::get('reviews', [ReviewController::class, 'index'])->name('reviews.index');
+        Route::delete('reviews/{review}', [ReviewController::class, 'destroy'])->name('reviews.destroy');
 
-    // Company Details
-    Route::get('company-details', [CompanyDetailController::class, 'index'])->name('company-details.index');
-    Route::post('company-details', [CompanyDetailController::class, 'update'])->name('company-details.update');
+        // Settings
+        Route::get('settings', [SettingsController::class, 'index'])->name('settings.index');
+        Route::post('settings', [SettingsController::class, 'update'])->name('settings.update');
+        Route::post('settings/password', [SettingsController::class, 'updatePassword'])->name('settings.password.update');
+        Route::post('settings/shipment-api', [SettingsController::class, 'updateShipmentApiCredentials'])->name('settings.shipment-api.update');
+        Route::post('settings/shipment-api/generate-token', [SettingsController::class, 'generateShipmentApiToken'])->name('settings.shipment-api.generate-token');
+
+        // Policy Pages
+        Route::get('policies', [AdminPolicyPageController::class, 'index'])->name('policies.index');
+        Route::post('policies', [AdminPolicyPageController::class, 'update'])->name('policies.update');
+
+        // Company Details
+        Route::get('company-details', [CompanyDetailController::class, 'index'])->name('company-details.index');
+        Route::post('company-details', [CompanyDetailController::class, 'update'])->name('company-details.update');
+    });
 });
