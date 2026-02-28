@@ -7,10 +7,12 @@ use App\Http\Controllers\Admin\CouponController;
 use App\Http\Controllers\Admin\CustomerController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\OrderController;
+use App\Http\Controllers\Admin\PolicyPageController as AdminPolicyPageController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\ReviewController;
 use App\Http\Controllers\Admin\SettingsController;
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\PolicyPageController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -21,6 +23,10 @@ Route::get('/', function () {
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [LoginController::class, 'login']);
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
+
+Route::get('/privacy-policy', [PolicyPageController::class, 'privacyPolicy'])->name('privacy-policy');
+Route::get('/terms-and-conditions', [PolicyPageController::class, 'termsAndConditions'])->name('terms-and-conditions');
+Route::get('/return-and-refund', [PolicyPageController::class, 'returnAndRefund'])->name('return-and-refund');
 
 // Admin Routes
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(function () {
@@ -71,6 +77,10 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
     Route::post('settings/password', [SettingsController::class, 'updatePassword'])->name('settings.password.update');
     Route::post('settings/shipment-api', [SettingsController::class, 'updateShipmentApiCredentials'])->name('settings.shipment-api.update');
     Route::post('settings/shipment-api/generate-token', [SettingsController::class, 'generateShipmentApiToken'])->name('settings.shipment-api.generate-token');
+
+    // Policy Pages
+    Route::get('policies', [AdminPolicyPageController::class, 'index'])->name('policies.index');
+    Route::post('policies', [AdminPolicyPageController::class, 'update'])->name('policies.update');
 
     // Company Details
     Route::get('company-details', [CompanyDetailController::class, 'index'])->name('company-details.index');

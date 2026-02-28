@@ -123,6 +123,13 @@
                     Settings
                 </a>
 
+                <a href="{{ route('admin.policies.index') }}" class="sidebar-link flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold tracking-wide text-stone-200 transition hover:bg-white/10 hover:text-white {{ request()->routeIs('admin.policies.*') ? 'active' : '' }}">
+                    <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-white/5">
+                        <i class="fas fa-file-alt"></i>
+                    </span>
+                    Policy Pages
+                </a>
+
                 <a href="{{ route('admin.company-details.index') }}" class="sidebar-link flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold tracking-wide text-stone-200 transition hover:bg-white/10 hover:text-white {{ request()->routeIs('admin.company-details.*') ? 'active' : '' }}">
                     <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-white/5">
                         <i class="fas fa-building"></i>

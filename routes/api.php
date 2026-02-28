@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\CartController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\PaymentController;
+use App\Http\Controllers\Api\PolicyPageController;
 use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\ShipmentController;
 use App\Http\Controllers\Api\UserAddressController;
@@ -19,6 +20,8 @@ Route::prefix('auth')->group(function () {
 });
 
 Route::get('/payment/config', [PaymentController::class, 'config']);
+Route::get('/policies', [PolicyPageController::class, 'index']);
+Route::get('/policies/{type}', [PolicyPageController::class, 'show']);
 Route::get('/shipment/shiprocket/config', [ShipmentController::class, 'config']);
 Route::post('/shipment/shiprocket/serviceability', [ShipmentController::class, 'serviceability']);
 
