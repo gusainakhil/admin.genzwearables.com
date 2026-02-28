@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\PaymentController;
 use App\Http\Controllers\Api\ProductController;
+use App\Http\Controllers\Api\ShipmentController;
 use App\Http\Controllers\Api\UserAddressController;
 use App\Http\Controllers\Api\WishlistController;
 use Illuminate\Support\Facades\Route;
@@ -18,6 +19,8 @@ Route::prefix('auth')->group(function () {
 });
 
 Route::get('/payment/config', [PaymentController::class, 'config']);
+Route::get('/shipment/shiprocket/config', [ShipmentController::class, 'config']);
+Route::post('/shipment/shiprocket/serviceability', [ShipmentController::class, 'serviceability']);
 
 Route::get('/categories', [CategoryController::class, 'index']);
 Route::get('/categories/{category}', [CategoryController::class, 'show']);

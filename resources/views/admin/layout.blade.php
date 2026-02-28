@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@yield('title', 'Admin Panel') - {{ $companyDetail?->brand_name ?? 'GenZ Wearables' }}</title>
+    <title>@yield('title', 'Admin Panel') - {{ $companyDetail?->brand_name ?? 'Ecommerce' }}</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     @stack('styles')
@@ -43,7 +43,7 @@
                         </div>
                     @endif
                     <div>
-                        <h1 class="text-lg font-semibold tracking-tight">{{ $companyDetail?->brand_name ?? 'GenZ Wearables' }}</h1>
+                        <h1 class="text-lg font-semibold tracking-tight">{{ $companyDetail?->brand_name ?? 'Ecommerce' }}</h1>
                         <p class="text-[0.6rem] uppercase tracking-[0.35em] text-rose-200/80">Admin Panel</p>
                     </div>
                 </div>

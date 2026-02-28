@@ -121,6 +121,169 @@
         </form>
     </div>
 
+    <!-- Shipment API Credentials -->
+    <div class="rounded-[28px] border border-rose-200/60 bg-white shadow-sm p-8">
+        <div class="mb-6">
+            <h3 class="text-2xl font-semibold text-stone-900 mb-2">Shipment API (Shiprocket)</h3>
+            <p class="text-sm text-stone-500">Configure Shiprocket API credentials for shipment booking and tracking.</p>
+        </div>
+
+        <form action="{{ route('admin.settings.shipment-api.update') }}" method="POST" class="space-y-6">
+            @csrf
+
+            <div class="rounded-2xl border border-rose-100/70 bg-stone-50/50 p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <label class="block text-sm font-semibold text-stone-900 mb-1">Enable Shiprocket</label>
+                        <p class="text-xs text-stone-500">Turn on/off shipment API integration</p>
+                    </div>
+                    <label class="relative inline-flex cursor-pointer items-center">
+                        <input type="checkbox" name="is_active" value="1" class="peer sr-only" {{ old('is_active', $shipmentApiCredential?->is_active) ? 'checked' : '' }}>
+                        <div class="peer h-7 w-14 rounded-full bg-stone-300 after:absolute after:left-1 after:top-1 after:h-5 after:w-5 after:rounded-full after:border after:border-stone-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-gradient-to-r peer-checked:from-rose-500 peer-checked:to-amber-500 peer-checked:after:translate-x-7 peer-checked:after:border-white peer-focus:ring-4 peer-focus:ring-rose-200/50"></div>
+                    </label>
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-sm font-semibold uppercase tracking-wider text-stone-500 mb-3">
+                    <i class="fas fa-envelope text-rose-500 mr-2"></i>Shiprocket Email
+                </label>
+                <input
+                    type="email"
+                    name="api_email"
+                    value="{{ old('api_email', $shipmentApiCredential?->api_email) }}"
+                    placeholder="your-shiprocket-email@example.com"
+                    class="w-full rounded-2xl border border-rose-200/60 bg-white px-5 py-3 text-sm text-stone-800 shadow-sm placeholder:text-stone-400 focus:border-rose-400 focus:outline-none focus:ring-4 focus:ring-rose-100/50"
+                    required
+                >
+                @error('api_email')
+                    <p class="mt-2 text-xs text-rose-600">{{ $message }}</p>
+                @enderror
+            </div>
+
+            <div>
+                <label class="block text-sm font-semibold uppercase tracking-wider text-stone-500 mb-3">
+                    <i class="fas fa-lock text-rose-500 mr-2"></i>Shiprocket Password
+                </label>
+                <input
+                    type="password"
+                    name="api_password"
+                    placeholder="{{ $shipmentApiCredential ? 'Leave blank to keep current password' : 'Enter Shiprocket password' }}"
+                    class="w-full rounded-2xl border border-rose-200/60 bg-white px-5 py-3 text-sm text-stone-800 shadow-sm placeholder:text-stone-400 focus:border-rose-400 focus:outline-none focus:ring-4 focus:ring-rose-100/50"
+                >
+                @error('api_password')
+                    <p class="mt-2 text-xs text-rose-600">{{ $message }}</p>
+                @enderror
+            </div>
+
+            <div>
+                <label class="block text-sm font-semibold uppercase tracking-wider text-stone-500 mb-3">
+                    <i class="fas fa-key text-rose-500 mr-2"></i>Shiprocket API Token (Optional)
+                </label>
+                <input
+                    type="text"
+                    name="api_token"
+                    value="{{ old('api_token', $shipmentApiCredential?->api_token) }}"
+                    placeholder="Optional token if already generated"
+                    class="w-full rounded-2xl border border-rose-200/60 bg-white px-5 py-3 text-sm text-stone-800 shadow-sm placeholder:text-stone-400 focus:border-rose-400 focus:outline-none focus:ring-4 focus:ring-rose-100/50"
+                >
+                @error('api_token')
+                    <p class="mt-2 text-xs text-rose-600">{{ $message }}</p>
+                @enderror
+            </div>
+
+            <div class="flex flex-wrap gap-4 pt-2">
+                <button
+                    type="submit"
+                    class="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-rose-500 to-amber-500 px-8 py-3 text-sm font-semibold uppercase tracking-[0.2em] text-white shadow-sm transition hover:from-rose-600 hover:to-amber-600 hover:shadow-md focus:outline-none focus:ring-4 focus:ring-rose-200/50"
+                >
+                    <i class="fas fa-shipping-fast"></i>
+                    Save Shiprocket Credentials
+                </button>
+            </div>
+        </form>
+
+        <form action="{{ route('admin.settings.shipment-api.generate-token') }}" method="POST" class="mt-4">
+            @csrf
+            <button
+                type="submit"
+                class="inline-flex items-center gap-2 rounded-full border border-rose-200 bg-white px-8 py-3 text-sm font-semibold uppercase tracking-[0.2em] text-stone-700 transition hover:border-rose-300 hover:text-stone-900 focus:outline-none focus:ring-4 focus:ring-rose-200/50"
+            >
+                <i class="fas fa-key"></i>
+                Generate Shiprocket Token
+            </button>
+        </form>
+    </div>
+
+    <!-- Admin Password Settings -->
+    <div class="rounded-[28px] border border-rose-200/60 bg-white shadow-sm p-8">
+        <div class="mb-6">
+            <h3 class="text-2xl font-semibold text-stone-900 mb-2">Admin Password</h3>
+            <p class="text-sm text-stone-500">Update your own login password securely</p>
+        </div>
+
+        <form action="{{ route('admin.settings.password.update') }}" method="POST" class="space-y-5">
+            @csrf
+
+            <div>
+                <label class="block text-sm font-semibold uppercase tracking-wider text-stone-500 mb-3">
+                    <i class="fas fa-lock text-rose-500 mr-2"></i>Current Password
+                </label>
+                <input
+                    type="password"
+                    name="current_password"
+                    placeholder="Enter current password"
+                    class="w-full rounded-2xl border border-rose-200/60 bg-white px-5 py-3 text-sm text-stone-800 shadow-sm placeholder:text-stone-400 focus:border-rose-400 focus:outline-none focus:ring-4 focus:ring-rose-100/50"
+                    required
+                >
+                @error('current_password')
+                    <p class="mt-2 text-xs text-rose-600">{{ $message }}</p>
+                @enderror
+            </div>
+
+            <div class="grid grid-cols-1 gap-5 md:grid-cols-2">
+                <div>
+                    <label class="block text-sm font-semibold uppercase tracking-wider text-stone-500 mb-3">
+                        <i class="fas fa-key text-rose-500 mr-2"></i>New Password
+                    </label>
+                    <input
+                        type="password"
+                        name="password"
+                        placeholder="Minimum 8 characters"
+                        class="w-full rounded-2xl border border-rose-200/60 bg-white px-5 py-3 text-sm text-stone-800 shadow-sm placeholder:text-stone-400 focus:border-rose-400 focus:outline-none focus:ring-4 focus:ring-rose-100/50"
+                        required
+                    >
+                    @error('password')
+                        <p class="mt-2 text-xs text-rose-600">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <div>
+                    <label class="block text-sm font-semibold uppercase tracking-wider text-stone-500 mb-3">
+                        <i class="fas fa-check-circle text-rose-500 mr-2"></i>Confirm New Password
+                    </label>
+                    <input
+                        type="password"
+                        name="password_confirmation"
+                        placeholder="Re-enter new password"
+                        class="w-full rounded-2xl border border-rose-200/60 bg-white px-5 py-3 text-sm text-stone-800 shadow-sm placeholder:text-stone-400 focus:border-rose-400 focus:outline-none focus:ring-4 focus:ring-rose-100/50"
+                        required
+                    >
+                </div>
+            </div>
+
+            <div class="flex flex-wrap gap-4 pt-2">
+                <button
+                    type="submit"
+                    class="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-rose-500 to-amber-500 px-8 py-3 text-sm font-semibold uppercase tracking-[0.2em] text-white shadow-sm transition hover:from-rose-600 hover:to-amber-600 hover:shadow-md focus:outline-none focus:ring-4 focus:ring-rose-200/50"
+                >
+                    <i class="fas fa-shield-alt"></i>
+                    Update Password
+                </button>
+            </div>
+        </form>
+    </div>
+
     <!-- API Documentation -->
     <div class="rounded-[28px] border border-rose-200/60 bg-white shadow-sm p-8">
         <div class="mb-6">

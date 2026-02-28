@@ -18,7 +18,7 @@
                             <img src="{{ asset('storage/' . $companyDetail->logo) }}" alt="{{ $companyDetail->brand_name ?? 'Brand' }} Logo" class="h-full w-full object-contain">
                         </span>
                     @endif
-                    <h2 class="text-3xl font-semibold tracking-tight sm:text-4xl">{{ $companyDetail?->brand_name ?? 'Genz Wearables' }} Dashboard</h2>
+                    <h2 class="text-3xl font-semibold tracking-tight sm:text-4xl">{{ $companyDetail?->brand_name ?? 'Ecommerce' }} Dashboard</h2>
                 </div>
                 <p class="max-w-2xl text-sm text-rose-100/80">A warm, premium view of orders, revenue, and customer energy. Your daily pulse, refined.</p>
             </div>

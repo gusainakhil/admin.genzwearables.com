@@ -68,6 +68,9 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
     // Settings
     Route::get('settings', [SettingsController::class, 'index'])->name('settings.index');
     Route::post('settings', [SettingsController::class, 'update'])->name('settings.update');
+    Route::post('settings/password', [SettingsController::class, 'updatePassword'])->name('settings.password.update');
+    Route::post('settings/shipment-api', [SettingsController::class, 'updateShipmentApiCredentials'])->name('settings.shipment-api.update');
+    Route::post('settings/shipment-api/generate-token', [SettingsController::class, 'generateShipmentApiToken'])->name('settings.shipment-api.generate-token');
 
     // Company Details
     Route::get('company-details', [CompanyDetailController::class, 'index'])->name('company-details.index');

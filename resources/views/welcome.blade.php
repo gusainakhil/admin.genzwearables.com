@@ -5,6 +5,13 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
         <title>{{ config('app.name', 'Laravel') }}</title>
+        @php
+            $companyFavicon = 'company/e34zbQRuAm8gicibhRPRPFnabiaHRU5kLE7r1rb6.png';
+            $faviconUrl = file_exists(public_path($companyFavicon))
+                ? asset($companyFavicon)
+                : asset('favicon.ico');
+        @endphp
+        <link rel="icon" type="image/png" href="{{ $faviconUrl }}">
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">
