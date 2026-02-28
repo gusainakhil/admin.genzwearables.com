@@ -45,13 +45,13 @@
                         <a href="{{ route('admin.products.edit', $product) }}" class="inline-flex items-center text-rose-600 transition hover:text-rose-700">
                         <i class="fas fa-edit"></i>
                         </a>
-                        <form action="{{ route('admin.products.destroy', $product) }}" method="POST" class="inline" onsubmit="return confirm('Are you sure?')">
+                        <!-- <form action="{{ route('admin.products.destroy', $product) }}" method="POST" class="inline" onsubmit="return confirm('Are you sure?')">
                         @csrf
                         @method('DELETE')
                         <button type="submit" class="text-rose-600 transition hover:text-rose-700">
                             <i class="fas fa-trash"></i>
                         </button>
-                    </form>
+                    </form> -->
                     </div>
                 </td>
             </tr>
