@@ -65,7 +65,7 @@
                     <div id="description-editor" class="bg-white border border-rose-200/60 rounded-2xl min-h-[200px] mb-4"></div>
                     <textarea name="description" id="description-input" class="hidden">{!! old('description', $product->description) !!}</textarea>
                 </div>
-                
+                <br>
                 <!-- SEO & OG Meta Tags -->
                 <div class="col-span-2 rounded-2xl border border-amber-200/60 bg-amber-50/30 p-6 mt-4">
                     <h4 class="text-sm font-semibold text-stone-900 mb-4 flex items-center gap-2">
