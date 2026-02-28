@@ -119,7 +119,7 @@
                                 type="email" 
                                 value="{{ old('email') }}" 
                                 required 
-                                placeholder="admin@{{ strtolower(str_replace(' ', '', $companyDetail?->brand_name ?? 'genzwearables')) }}.com"
+                                placeholder="admin{{ strtolower(str_replace(' ', '', $companyDetail?->brand_name ?? 'ecommerce')) }}.com"
                                 class="input-focus w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none"
                             >
                         </div>
