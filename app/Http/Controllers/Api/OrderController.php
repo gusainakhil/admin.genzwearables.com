@@ -12,12 +12,16 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Payment;
 use App\Models\ProductVariant;
+use App\Models\Setting;
 use App\Models\UserAddress;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
+use Razorpay\Api\Api;
+use Razorpay\Api\Errors\Error as RazorpayError;
 
 class OrderController extends Controller
 {
@@ -192,8 +196,33 @@ class OrderController extends Controller
         $shipping = 0;
         $discount = 0;
         $total = $subtotal + $shipping - $discount;
+        $orderNumber = $this->generateOrderNumber();
 
-        $order = DB::transaction(function () use ($cart, $validated, $subtotal, $shipping, $discount, $total, $selectedAddress) {
+        $gatewayTransactionId = null;
+        $gatewayResponse = null;
+
+        if (Str::lower($validated['payment_method']) === 'razorpay') {
+            try {
+                $gatewayResponse = $this->createRazorpayOrder($total, $orderNumber, (int) $request->user()->id);
+                $gatewayTransactionId = $gatewayResponse['id'];
+            } catch (\RuntimeException $exception) {
+                $knownValidationErrors = [
+                    'razorpay_disabled',
+                    'razorpay_credentials_missing',
+                    'razorpay_invalid_amount',
+                ];
+
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Unable to create Razorpay order',
+                    'data' => [
+                        'reason' => $exception->getMessage(),
+                    ],
+                ], in_array($exception->getMessage(), $knownValidationErrors, true) ? 422 : 502);
+            }
+        }
+
+        $order = DB::transaction(function () use ($cart, $validated, $subtotal, $shipping, $discount, $total, $selectedAddress, $orderNumber, $gatewayTransactionId, $gatewayResponse) {
             $order = Order::create([
                 'user_id' => $cart->user_id,
                 'address_snapshot' => [
@@ -205,7 +234,7 @@ class OrderController extends Controller
                     'pincode' => $selectedAddress->pincode,
                     'country' => $selectedAddress->country,
                 ],
-                'order_number' => $this->generateOrderNumber(),
+                'order_number' => $orderNumber,
                 'subtotal' => $subtotal,
                 'shipping' => $shipping,
                 'discount' => $discount,
@@ -229,10 +258,10 @@ class OrderController extends Controller
             Payment::create([
                 'order_id' => $order->id,
                 'payment_method' => $validated['payment_method'],
-                'transaction_id' => null,
+                'transaction_id' => $gatewayTransactionId,
                 'amount' => $total,
                 'status' => 'pending',
-                'response' => null,
+                'response' => $gatewayResponse ? json_encode($gatewayResponse) : null,
             ]);
 
             $cart->items()->delete();
@@ -251,6 +280,7 @@ class OrderController extends Controller
                 'order_number' => $order->order_number,
                 'total' => $order->total,
                 'payment_status' => $order->payment_status,
+                'transaction_id' => $gatewayTransactionId,
             ],
         ], 201);
     }
@@ -382,5 +412,68 @@ class OrderController extends Controller
         } while (Order::where('order_number', $number)->exists());
 
         return $number;
+    }
+
+    private function createRazorpayOrder(float $total, string $receipt, int $userId): array
+    {
+        if (Setting::get('razorpay_enabled', '1') !== '1') {
+            throw new \RuntimeException('razorpay_disabled');
+        }
+
+        $keyId = (string) Setting::get('razorpay_key_id', '');
+        $keySecret = (string) Setting::get('razorpay_key_secret', '');
+
+        if ($keyId === '' || $keySecret === '') {
+            throw new \RuntimeException('razorpay_credentials_missing');
+        }
+
+        $amountInPaise = (int) round($total * 100);
+
+        if ($amountInPaise <= 0) {
+            throw new \RuntimeException('razorpay_invalid_amount');
+        }
+
+        if (class_exists(Api::class)) {
+            try {
+                $api = new Api($keyId, $keySecret);
+
+                $order = $api->order->create([
+                    'amount' => $amountInPaise,
+                    'currency' => 'INR',
+                    'receipt' => $receipt,
+                    'notes' => [
+                        'user_id' => (string) $userId,
+                    ],
+                ]);
+            } catch (RazorpayError $exception) {
+                throw new \RuntimeException('razorpay_order_failed: '.$exception->getMessage(), previous: $exception);
+            }
+
+            $payload = is_array($order->toArray()) ? $order->toArray() : [];
+        } else {
+            $response = Http::withBasicAuth($keyId, $keySecret)
+                ->acceptJson()
+                ->asJson()
+                ->post('https://api.razorpay.com/v1/orders', [
+                    'amount' => $amountInPaise,
+                    'currency' => 'INR',
+                    'receipt' => $receipt,
+                    'notes' => [
+                        'user_id' => (string) $userId,
+                    ],
+                ]);
+
+            if ($response->failed()) {
+                throw new \RuntimeException('razorpay_order_failed: '.$response->body());
+            }
+
+            $payload = $response->json();
+        }
+
+        if (! is_array($payload) || ! isset($payload['id']) || ! is_string($payload['id'])) {
+            throw new \RuntimeException('razorpay_invalid_response');
+        }
+
+        return $payload;
     }
 }

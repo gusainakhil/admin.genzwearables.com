@@ -30,9 +30,30 @@ class SettingsController extends Controller
     public function update(Request $request)
     {
         $validated = $request->validate([
-            'razorpay_key_id' => 'nullable|string|max:100',
-            'razorpay_key_secret' => 'nullable|string|max:100',
+            'razorpay_key_id' => [
+                'nullable',
+                'string',
+                'max:100',
+                'required_if:razorpay_enabled,1',
+                'required_with:razorpay_key_secret',
+                'regex:/^rzp_(test|live)_[A-Za-z0-9]+$/',
+            ],
+            'razorpay_key_secret' => [
+                'nullable',
+                'string',
+                'max:100',
+                'required_if:razorpay_enabled,1',
+                'required_with:razorpay_key_id',
+                'regex:/^[A-Za-z0-9]{16,}$/',
+            ],
             'razorpay_enabled' => 'nullable|boolean',
+        ], [
+            'razorpay_key_id.required_if' => 'Razorpay Key ID is required when Razorpay is enabled.',
+            'razorpay_key_id.required_with' => 'Razorpay Key ID is required when Key Secret is provided.',
+            'razorpay_key_id.regex' => 'Razorpay Key ID must start with rzp_test_ or rzp_live_.',
+            'razorpay_key_secret.required_if' => 'Razorpay Key Secret is required when Razorpay is enabled.',
+            'razorpay_key_secret.required_with' => 'Razorpay Key Secret is required when Key ID is provided.',
+            'razorpay_key_secret.regex' => 'Razorpay Key Secret format looks invalid.',
         ]);
 
         foreach ($validated as $key => $value) {
