@@ -53,3 +53,4 @@ Route::middleware('auth:sanctum')->post('/orders/checkout', [OrderController::cl
 Route::middleware('auth:sanctum')->get('/orders', [OrderController::class, 'index']);
 Route::middleware('auth:sanctum')->get('/orders/{order}', [OrderController::class, 'show']);
 Route::middleware('auth:sanctum')->patch('/orders/{order}/payment', [OrderController::class, 'updatePayment']);
+Route::middleware('auth:sanctum')->post('/orders/payment/sync', [OrderController::class, 'syncRazorpayPayment']);

@@ -13,17 +13,15 @@ class AdminUserSeeder extends Seeder
      */
     public function run(): void
     {
-        User::create([
-            'name' => 'Admin',
-            'email' => 'admin@genzwearables.com',
-            'phone' => '1234567890',
-            'password' => Hash::make('password'),
-            'role' => 'admin',
-            'status' => 'active',
-        ]);
-
-        echo "Admin user created successfully!\n";
-        echo "Email: admin@genzwearables.com\n";
-        echo "Password: password\n";
+        User::updateOrCreate(
+            ['email' => 'admin@genzwearables.com'],
+            [
+                'name' => 'Admin',
+                'phone' => '1234567890',
+                'password' => Hash::make('password'),
+                'role' => 'admin',
+                'status' => 'active',
+            ]
+        );
     }
 }

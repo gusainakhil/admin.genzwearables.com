@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\StoreOrderRequest;
+use App\Http\Requests\Api\SyncRazorpayOrderPaymentRequest;
 use App\Http\Requests\Api\UpdateOrderPaymentRequest;
 use App\Mail\OrderPaid;
 use App\Mail\OrderPlaced;
@@ -31,16 +32,60 @@ class OrderController extends Controller
 
         $orders = Order::query()
             ->where('user_id', $request->user()->id)
+            ->with([
+                'items.product.images' => function ($query) {
+                    $query->orderByDesc('is_primary');
+                },
+                'items.variant.size',
+                'items.variant.color',
+            ])
             ->latest()
             ->paginate($perPage);
 
         $orders->getCollection()->transform(function (Order $order) {
+            $items = $order->items->map(function (OrderItem $item) {
+                $product = $item->product;
+                $variant = $item->variant;
+                $primaryImage = $product?->images?->first();
+
+                return [
+                    'id' => $item->id,
+                    'product_id' => $item->product_id,
+                    'product_variant_id' => $item->product_variant_id,
+                    'price' => $item->price,
+                    'quantity' => $item->quantity,
+                    'product' => $product ? [
+                        'id' => $product->id,
+                        'name' => $product->name,
+                        'slug' => $product->slug,
+                        'brand' => $product->brand,
+                        'image' => $primaryImage ? [
+                            'id' => $primaryImage->id,
+                            'path' => $primaryImage->image,
+                            'url' => asset('storage/'.$primaryImage->image),
+                            'is_primary' => (bool) $primaryImage->is_primary,
+                        ] : null,
+                    ] : null,
+                    'variant' => $variant ? [
+                        'id' => $variant->id,
+                        'sku' => $variant->sku,
+                        'price' => $variant->price,
+                        'size' => $variant->size,
+                        'color' => $variant->color,
+                    ] : null,
+                ];
+            });
+
             return [
                 'id' => $order->id,
                 'order_number' => $order->order_number,
+                'subtotal' => $order->subtotal,
+                'shipping' => $order->shipping,
+                'discount' => $order->discount,
                 'total' => $order->total,
                 'payment_status' => $order->payment_status,
                 'order_status' => $order->order_status,
+                'items' => $items,
                 'created_at' => $order->created_at,
             ];
         });
@@ -405,6 +450,217 @@ class OrderController extends Controller
         ]);
     }
 
+    public function syncRazorpayPayment(SyncRazorpayOrderPaymentRequest $request): JsonResponse
+    {
+        $validated = $request->validated();
+
+        $payment = Payment::query()
+            ->with(['order.items.variant', 'order.user'])
+            ->where('transaction_id', $validated['order_id'])
+            ->whereHas('order', function ($query) use ($request) {
+                $query->where('user_id', $request->user()->id);
+            })
+            ->latest('id')
+            ->first();
+
+        if (! $payment || ! $payment->order) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Order not found',
+            ], 404);
+        }
+
+        $order = $payment->order;
+
+        if ($order->payment_status === 'paid') {
+            return response()->json([
+                'status' => true,
+                'message' => 'Order already paid',
+                'data' => [
+                    'id' => $order->id,
+                    'order_number' => $order->order_number,
+                    'payment_status' => $order->payment_status,
+                    'order_id' => $validated['order_id'],
+                ],
+            ]);
+        }
+
+        try {
+            $razorpayPayload = $this->fetchRazorpayOrderPayments($validated['order_id']);
+        } catch (\RuntimeException $exception) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Unable to fetch payment status from Razorpay',
+                'data' => [
+                    'reason' => $exception->getMessage(),
+                ],
+            ], 502);
+        }
+
+        $items = collect($razorpayPayload['items'] ?? []);
+
+        $hasCaptured = $items->contains(function ($item) {
+            if (! is_array($item)) {
+                return false;
+            }
+
+            return ($item['status'] ?? null) === 'captured' || ($item['captured'] ?? false) === true;
+        });
+
+        $hasPending = $items->contains(function ($item) {
+            if (! is_array($item)) {
+                return false;
+            }
+
+            return in_array(($item['status'] ?? ''), ['created', 'authorized'], true);
+        });
+
+        $hasFailed = $items->contains(function ($item) {
+            return is_array($item) && ($item['status'] ?? null) === 'failed';
+        });
+
+        if ($hasCaptured) {
+            $mailRequired = false;
+
+            try {
+                DB::transaction(function () use ($order, $payment, $validated, $razorpayPayload, &$mailRequired) {
+                    $freshOrder = Order::query()
+                        ->with(['items', 'payment'])
+                        ->lockForUpdate()
+                        ->find($order->id);
+
+                    if (! $freshOrder) {
+                        throw new \RuntimeException('order_not_found');
+                    }
+
+                    if ($freshOrder->payment_status !== 'paid') {
+                        foreach ($freshOrder->items as $item) {
+                            $variant = ProductVariant::query()
+                                ->whereKey($item->product_variant_id)
+                                ->lockForUpdate()
+                                ->first();
+
+                            if (! $variant || $item->quantity > $variant->stock_qty) {
+                                throw new \RuntimeException('insufficient_stock');
+                            }
+
+                            $variant->decrement('stock_qty', $item->quantity);
+                        }
+
+                        $freshOrder->update([
+                            'payment_status' => 'paid',
+                        ]);
+
+                        $mailRequired = true;
+                    }
+
+                    Payment::updateOrCreate(
+                        ['order_id' => $freshOrder->id],
+                        [
+                            'payment_method' => $payment->payment_method ?: 'razorpay',
+                            'transaction_id' => $validated['order_id'],
+                            'amount' => $freshOrder->total ?? 0,
+                            'status' => 'success',
+                            'response' => json_encode($razorpayPayload),
+                        ]
+                    );
+                });
+            } catch (\RuntimeException $exception) {
+                if ($exception->getMessage() === 'insufficient_stock') {
+                    return response()->json([
+                        'status' => false,
+                        'message' => 'Insufficient stock',
+                    ], 422);
+                }
+
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Unable to sync payment status',
+                    'data' => [
+                        'reason' => $exception->getMessage(),
+                    ],
+                ], 422);
+            }
+
+            $order->refresh()->load('user');
+
+            if ($mailRequired && $order->user) {
+                Mail::to($order->user->email)->send(new OrderPaid($order));
+            }
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Payment synchronized',
+                'data' => [
+                    'id' => $order->id,
+                    'order_number' => $order->order_number,
+                    'order_id' => $validated['order_id'],
+                    'payment_status' => $order->payment_status,
+                ],
+            ]);
+        }
+
+        if ($hasFailed && ! $hasPending) {
+            DB::transaction(function () use ($order, $payment, $validated, $razorpayPayload) {
+                $freshOrder = Order::query()
+                    ->lockForUpdate()
+                    ->find($order->id);
+
+                if ($freshOrder && $freshOrder->payment_status !== 'paid') {
+                    $freshOrder->update([
+                        'payment_status' => 'failed',
+                    ]);
+                }
+
+                Payment::updateOrCreate(
+                    ['order_id' => $order->id],
+                    [
+                        'payment_method' => $payment->payment_method ?: 'razorpay',
+                        'transaction_id' => $validated['order_id'],
+                        'amount' => $order->total ?? 0,
+                        'status' => 'failed',
+                        'response' => json_encode($razorpayPayload),
+                    ]
+                );
+            });
+
+            $order->refresh();
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Payment synchronized',
+                'data' => [
+                    'id' => $order->id,
+                    'order_number' => $order->order_number,
+                    'order_id' => $validated['order_id'],
+                    'payment_status' => $order->payment_status,
+                ],
+            ]);
+        }
+
+        Payment::updateOrCreate(
+            ['order_id' => $order->id],
+            [
+                'payment_method' => $payment->payment_method ?: 'razorpay',
+                'transaction_id' => $validated['order_id'],
+                'amount' => $order->total ?? 0,
+                'status' => 'pending',
+                'response' => json_encode($razorpayPayload),
+            ]
+        );
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Payment still pending',
+            'data' => [
+                'id' => $order->id,
+                'order_number' => $order->order_number,
+                'order_id' => $validated['order_id'],
+                'payment_status' => $order->payment_status,
+            ],
+        ]);
+    }
+
     private function generateOrderNumber(): string
     {
         do {
@@ -471,6 +727,36 @@ class OrderController extends Controller
         }
 
         if (! is_array($payload) || ! isset($payload['id']) || ! is_string($payload['id'])) {
+            throw new \RuntimeException('razorpay_invalid_response');
+        }
+
+        return $payload;
+    }
+
+    private function fetchRazorpayOrderPayments(string $razorpayOrderId): array
+    {
+        if (Setting::get('razorpay_enabled', '1') !== '1') {
+            throw new \RuntimeException('razorpay_disabled');
+        }
+
+        $keyId = (string) Setting::get('razorpay_key_id', '');
+        $keySecret = (string) Setting::get('razorpay_key_secret', '');
+
+        if ($keyId === '' || $keySecret === '') {
+            throw new \RuntimeException('razorpay_credentials_missing');
+        }
+
+        $response = Http::withBasicAuth($keyId, $keySecret)
+            ->acceptJson()
+            ->get("https://api.razorpay.com/v1/orders/{$razorpayOrderId}/payments");
+
+        if ($response->failed()) {
+            throw new \RuntimeException('razorpay_payment_fetch_failed: '.$response->body());
+        }
+
+        $payload = $response->json();
+
+        if (! is_array($payload) || ! array_key_exists('items', $payload) || ! is_array($payload['items'])) {
             throw new \RuntimeException('razorpay_invalid_response');
         }
 
