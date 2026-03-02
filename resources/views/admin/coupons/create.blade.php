@@ -43,6 +43,13 @@
                 </div>
 
                 <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-stone-500 mb-2">User Usage Limit</label>
+                    <input type="number" min="1" name="user_usage_limit" value="{{ old('user_usage_limit') }}"
+                        class="w-full rounded-2xl border border-rose-200/60 bg-white px-4 py-3 text-sm text-stone-800 shadow-sm focus:border-rose-400 focus:outline-none"
+                        placeholder="Leave empty for unlimited">
+                </div>
+
+                <div>
                     <label class="block text-xs font-semibold uppercase tracking-wider text-stone-500 mb-2">Expiry Date</label>
                     <input type="date" name="expiry_date" value="{{ old('expiry_date') }}" 
                         class="w-full rounded-2xl border border-rose-200/60 bg-white px-4 py-3 text-sm text-stone-800 shadow-sm focus:border-rose-400 focus:outline-none" required>

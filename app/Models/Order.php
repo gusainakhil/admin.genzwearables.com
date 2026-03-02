@@ -17,6 +17,8 @@ class Order extends Model
         'subtotal',
         'shipping',
         'discount',
+        'coupon_id',
+        'coupon_code',
         'total',
         'payment_status',
         'order_status',
@@ -53,5 +55,10 @@ class Order extends Model
     public function shipment(): HasOne
     {
         return $this->hasOne(Shipment::class);
+    }
+
+    public function coupon(): BelongsTo
+    {
+        return $this->belongsTo(Coupon::class);
     }
 }

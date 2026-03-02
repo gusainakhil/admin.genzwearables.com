@@ -24,6 +24,7 @@
                     <th class="px-6 py-4">Type</th>
                     <th class="px-6 py-4">Value</th>
                     <th class="px-6 py-4">Min Order</th>
+                    <th class="px-6 py-4">Per User Limit</th>
                     <th class="px-6 py-4">Expiry</th>
                     <th class="px-6 py-4">Status</th>
                     <th class="px-6 py-4">Actions</th>
@@ -42,6 +43,7 @@
                         @endif
                     </td>
                     <td class="px-6 py-4 text-stone-600">₹{{ number_format($coupon->min_order_amount, 2) }}</td>
+                    <td class="px-6 py-4 text-stone-600">{{ $coupon->user_usage_limit ?? 'Unlimited' }}</td>
                     <td class="px-6 py-4 text-stone-600">{{ $coupon->expiry_date->format('M d, Y') }}</td>
                     <td class="px-6 py-4">
                         <span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold {{ $coupon->status == 'active' ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800' }}">
@@ -65,7 +67,7 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="7" class="px-6 py-10 text-center text-sm text-stone-500">No coupons found</td>
+                    <td colspan="8" class="px-6 py-10 text-center text-sm text-stone-500">No coupons found</td>
                 </tr>
                 @endforelse
             </tbody>

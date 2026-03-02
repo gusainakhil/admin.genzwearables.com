@@ -27,6 +27,7 @@ class CouponController extends Controller
             'discount_type' => 'required|in:flat,percent',
             'discount_value' => 'required|numeric|min:0',
             'min_order_amount' => 'nullable|numeric|min:0',
+            'user_usage_limit' => 'nullable|integer|min:1',
             'expiry_date' => 'required|date',
             'status' => 'required|in:active,inactive',
         ]);
@@ -51,6 +52,7 @@ class CouponController extends Controller
             'discount_type' => 'required|in:flat,percent',
             'discount_value' => 'required|numeric|min:0',
             'min_order_amount' => 'nullable|numeric|min:0',
+            'user_usage_limit' => 'nullable|integer|min:1',
             'expiry_date' => 'required|date',
             'status' => 'required|in:active,inactive',
         ]);

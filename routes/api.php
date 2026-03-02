@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CartController;
 use App\Http\Controllers\Api\CategoryController;
+use App\Http\Controllers\Api\CouponController;
 use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\PaymentController;
 use App\Http\Controllers\Api\PolicyPageController;
@@ -43,6 +44,13 @@ Route::middleware('auth:sanctum')->get('/cart', [CartController::class, 'index']
 Route::middleware('auth:sanctum')->post('/cart/items', [CartController::class, 'store']);
 Route::middleware('auth:sanctum')->patch('/cart/items/{item}', [CartController::class, 'update']);
 Route::middleware('auth:sanctum')->delete('/cart/items/{item}', [CartController::class, 'destroy']);
+Route::get('/coupons/apply', function () {
+    return response()->json([
+        'status' => false,
+        'message' => 'Use POST /api/coupons/apply with Bearer token and JSON body {"code":"COUPON_CODE"}.',
+    ], 405);
+});
+Route::middleware('auth:sanctum')->post('/coupons/apply', [CouponController::class, 'apply']);
 
 Route::middleware('auth:sanctum')->get('/addresses', [UserAddressController::class, 'index']);
 Route::middleware('auth:sanctum')->post('/addresses', [UserAddressController::class, 'store']);

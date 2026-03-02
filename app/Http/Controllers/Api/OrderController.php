@@ -9,6 +9,7 @@ use App\Http\Requests\Api\UpdateOrderPaymentRequest;
 use App\Mail\OrderPaid;
 use App\Mail\OrderPlaced;
 use App\Models\Cart;
+use App\Models\Coupon;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Payment;
@@ -238,9 +239,65 @@ class OrderController extends Controller
         $subtotal = $cart->items->sum(function ($item) {
             return (float) $item->productVariant->price * $item->quantity;
         });
+
         $shipping = 0;
         $discount = 0;
-        $total = $subtotal + $shipping - $discount;
+        $couponId = null;
+        $couponCode = null;
+
+        if (! empty($validated['coupon_code'])) {
+            $couponCode = Str::upper(trim((string) $validated['coupon_code']));
+
+            $coupon = Coupon::query()
+                ->where('code', $couponCode)
+                ->where('status', 'active')
+                ->first();
+
+            if (! $coupon) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Invalid coupon code',
+                ], 422);
+            }
+
+            if (strtotime((string) $coupon->expiry_date) < strtotime(today()->toDateString())) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Coupon has expired',
+                ], 422);
+            }
+
+            if ($coupon->min_order_amount !== null && $subtotal < (float) $coupon->min_order_amount) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Minimum order amount not met for this coupon',
+                ], 422);
+            }
+
+            if ($coupon->user_usage_limit !== null) {
+                $usedCount = Order::query()
+                    ->where('user_id', $request->user()->id)
+                    ->where('coupon_id', $coupon->id)
+                    ->where('payment_status', 'paid')
+                    ->count();
+
+                if ($usedCount >= $coupon->user_usage_limit) {
+                    return response()->json([
+                        'status' => false,
+                        'message' => 'Coupon usage limit reached',
+                    ], 422);
+                }
+            }
+
+            $discount = $coupon->discount_type === 'percent'
+                ? round($subtotal * ((float) $coupon->discount_value / 100), 2)
+                : (float) $coupon->discount_value;
+
+            $discount = min($discount, $subtotal + $shipping);
+            $couponId = $coupon->id;
+        }
+
+        $total = max(0, $subtotal + $shipping - $discount);
         $orderNumber = $this->generateOrderNumber();
 
         $gatewayTransactionId = null;
@@ -267,7 +324,7 @@ class OrderController extends Controller
             }
         }
 
-        $order = DB::transaction(function () use ($cart, $validated, $subtotal, $shipping, $discount, $total, $selectedAddress, $orderNumber, $gatewayTransactionId, $gatewayResponse) {
+        $order = DB::transaction(function () use ($cart, $validated, $subtotal, $shipping, $discount, $total, $couponId, $couponCode, $selectedAddress, $orderNumber, $gatewayTransactionId, $gatewayResponse) {
             $order = Order::create([
                 'user_id' => $cart->user_id,
                 'address_snapshot' => [
@@ -283,6 +340,8 @@ class OrderController extends Controller
                 'subtotal' => $subtotal,
                 'shipping' => $shipping,
                 'discount' => $discount,
+                'coupon_id' => $couponId,
+                'coupon_code' => $couponCode,
                 'total' => $total,
                 'payment_status' => 'pending',
                 'order_status' => 'placed',
@@ -323,6 +382,8 @@ class OrderController extends Controller
             'data' => [
                 'id' => $order->id,
                 'order_number' => $order->order_number,
+                'discount' => $order->discount,
+                'coupon_code' => $order->coupon_code,
                 'total' => $order->total,
                 'payment_status' => $order->payment_status,
                 'transaction_id' => $gatewayTransactionId,
