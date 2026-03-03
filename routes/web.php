@@ -10,6 +10,7 @@ use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\PolicyPageController as AdminPolicyPageController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\ReviewController;
+use App\Http\Controllers\Admin\SidebarBannerController;
 use App\Http\Controllers\Admin\SettingsController;
 use App\Http\Controllers\Admin\StaffController;
 use App\Http\Controllers\Auth\LoginController;
@@ -90,5 +91,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin:admin,staff']
         // Company Details
         Route::get('company-details', [CompanyDetailController::class, 'index'])->name('company-details.index');
         Route::post('company-details', [CompanyDetailController::class, 'update'])->name('company-details.update');
+
+        // Sidebar Banners
+        Route::resource('sidebar-banners', SidebarBannerController::class)->except(['show']);
     });
 });

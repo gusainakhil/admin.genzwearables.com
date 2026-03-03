@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\PaymentController;
 use App\Http\Controllers\Api\CompanyDetailController;
 use App\Http\Controllers\Api\PolicyPageController;
 use App\Http\Controllers\Api\ProductController;
+use App\Http\Controllers\Api\SidebarBannerController;
 use App\Http\Controllers\Api\ShipmentController;
 use App\Http\Controllers\Api\UserAddressController;
 use App\Http\Controllers\Api\WishlistController;
@@ -23,6 +24,7 @@ Route::prefix('auth')->group(function () {
 
 Route::get('/payment/config', [PaymentController::class, 'config']);
 Route::get('/company-details', [CompanyDetailController::class, 'show']);
+Route::get('/sidebar-banners', [SidebarBannerController::class, 'index']);
 Route::get('/policies', [PolicyPageController::class, 'index']);
 Route::get('/policies/{type}', [PolicyPageController::class, 'show']);
 Route::get('/shipment/shiprocket/config', [ShipmentController::class, 'config']);

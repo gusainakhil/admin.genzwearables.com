@@ -144,6 +144,13 @@
                     </span>
                     Company Details
                 </a>
+
+                <a href="{{ route('admin.sidebar-banners.index') }}" class="sidebar-link flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold tracking-wide text-stone-200 transition hover:bg-white/10 hover:text-white {{ request()->routeIs('admin.sidebar-banners.*') ? 'active' : '' }}">
+                    <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-white/5">
+                        <i class="fas fa-images"></i>
+                    </span>
+                    Sidebar Banners
+                </a>
                 @endif
             </nav>
         </aside>
