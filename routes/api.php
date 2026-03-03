@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\CouponController;
 use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\PaymentController;
+use App\Http\Controllers\Api\CompanyDetailController;
 use App\Http\Controllers\Api\PolicyPageController;
 use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\ShipmentController;
@@ -21,6 +22,7 @@ Route::prefix('auth')->group(function () {
 });
 
 Route::get('/payment/config', [PaymentController::class, 'config']);
+Route::get('/company-details', [CompanyDetailController::class, 'show']);
 Route::get('/policies', [PolicyPageController::class, 'index']);
 Route::get('/policies/{type}', [PolicyPageController::class, 'show']);
 Route::get('/shipment/shiprocket/config', [ShipmentController::class, 'config']);
