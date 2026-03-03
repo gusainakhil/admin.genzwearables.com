@@ -25,6 +25,11 @@
                     <input type="text" name="website_name" value="{{ old('website_name', $companyDetail?->website_name) }}" class="w-full rounded-2xl border border-rose-200/60 bg-white px-4 py-3 text-sm text-stone-800 shadow-sm focus:border-rose-400 focus:outline-none">
                 </div>
 
+                <div class="md:col-span-2">
+                    <label class="mb-2 block text-xs font-semibold uppercase tracking-wider text-stone-500">Company Headline</label>
+                    <input type="text" name="company_headline" value="{{ old('company_headline', $companyDetail?->company_headline) }}" class="w-full rounded-2xl border border-rose-200/60 bg-white px-4 py-3 text-sm text-stone-800 shadow-sm focus:border-rose-400 focus:outline-none" placeholder="Enter company headline">
+                </div>
+
                 <div>
                     <label class="mb-2 block text-xs font-semibold uppercase tracking-wider text-stone-500">Phone Number 1</label>
                     <input type="text" name="phone_number1" value="{{ old('phone_number1', $companyDetail?->phone_number1) }}" class="w-full rounded-2xl border border-rose-200/60 bg-white px-4 py-3 text-sm text-stone-800 shadow-sm focus:border-rose-400 focus:outline-none">
@@ -88,6 +93,51 @@
                 <div class="md:col-span-2">
                     <label class="mb-2 block text-xs font-semibold uppercase tracking-wider text-stone-500">Additional Info</label>
                     <textarea name="additional_info" rows="3" class="w-full rounded-2xl border border-rose-200/60 bg-white px-4 py-3 text-sm text-stone-800 shadow-sm focus:border-rose-400 focus:outline-none">{{ old('additional_info', $companyDetail?->additional_info) }}</textarea>
+                </div>
+
+                <div class="md:col-span-2">
+                    <h4 class="mb-3 text-sm font-semibold uppercase tracking-[0.12em] text-stone-500">Social Media Links</h4>
+                    <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+                        <div>
+                            <label class="mb-2 block text-xs font-semibold uppercase tracking-wider text-stone-500">YouTube</label>
+                            <div class="flex items-center rounded-2xl border border-rose-200/60 bg-white px-4">
+                                <i class="fab fa-youtube text-sm text-stone-500"></i>
+                                <input type="url" name="youtube_url" value="{{ old('youtube_url', $companyDetail?->youtube_url) }}" class="w-full border-0 bg-transparent px-3 py-3 text-sm text-stone-800 focus:outline-none" placeholder="https://youtube.com/...">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="mb-2 block text-xs font-semibold uppercase tracking-wider text-stone-500">Facebook</label>
+                            <div class="flex items-center rounded-2xl border border-rose-200/60 bg-white px-4">
+                                <i class="fab fa-facebook-f text-sm text-stone-500"></i>
+                                <input type="url" name="facebook_url" value="{{ old('facebook_url', $companyDetail?->facebook_url) }}" class="w-full border-0 bg-transparent px-3 py-3 text-sm text-stone-800 focus:outline-none" placeholder="https://facebook.com/...">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="mb-2 block text-xs font-semibold uppercase tracking-wider text-stone-500">Pinterest</label>
+                            <div class="flex items-center rounded-2xl border border-rose-200/60 bg-white px-4">
+                                <i class="fab fa-pinterest-p text-sm text-stone-500"></i>
+                                <input type="url" name="pinterest_url" value="{{ old('pinterest_url', $companyDetail?->pinterest_url) }}" class="w-full border-0 bg-transparent px-3 py-3 text-sm text-stone-800 focus:outline-none" placeholder="https://pinterest.com/...">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="mb-2 block text-xs font-semibold uppercase tracking-wider text-stone-500">Twitter</label>
+                            <div class="flex items-center rounded-2xl border border-rose-200/60 bg-white px-4">
+                                <i class="fab fa-twitter text-sm text-stone-500"></i>
+                                <input type="url" name="twitter_url" value="{{ old('twitter_url', $companyDetail?->twitter_url) }}" class="w-full border-0 bg-transparent px-3 py-3 text-sm text-stone-800 focus:outline-none" placeholder="https://twitter.com/...">
+                            </div>
+                        </div>
+
+                        <div class="md:col-span-2">
+                            <label class="mb-2 block text-xs font-semibold uppercase tracking-wider text-stone-500">LinkedIn</label>
+                            <div class="flex items-center rounded-2xl border border-rose-200/60 bg-white px-4">
+                                <i class="fab fa-linkedin-in text-sm text-stone-500"></i>
+                                <input type="url" name="linkedin_url" value="{{ old('linkedin_url', $companyDetail?->linkedin_url) }}" class="w-full border-0 bg-transparent px-3 py-3 text-sm text-stone-800 focus:outline-none" placeholder="https://linkedin.com/company/...">
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 

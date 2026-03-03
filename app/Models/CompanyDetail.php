@@ -8,6 +8,7 @@ class CompanyDetail extends Model
 {
     protected $fillable = [
         'brand_name',
+        'company_headline',
         'logo',
         'favicon',
         'address',
@@ -24,5 +25,10 @@ class CompanyDetail extends Model
         'email_primary',
         'email_secondary',
         'additional_info',
+        'youtube_url',
+        'facebook_url',
+        'pinterest_url',
+        'twitter_url',
+        'linkedin_url',
     ];
 }

@@ -22,6 +22,7 @@ class UpdateCompanyDetailRequest extends FormRequest
     {
         return [
             'brand_name' => 'required|string|max:150',
+            'company_headline' => 'nullable|string|max:255',
             'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
             'favicon' => 'nullable|image|mimes:png,ico,webp,jpg,jpeg|max:1024',
             'address' => 'nullable|string|max:1000',
@@ -38,6 +39,11 @@ class UpdateCompanyDetailRequest extends FormRequest
             'email_primary' => 'nullable|email|max:150',
             'email_secondary' => 'nullable|email|max:150',
             'additional_info' => 'nullable|string|max:2000',
+            'youtube_url' => 'nullable|url|max:255',
+            'facebook_url' => 'nullable|url|max:255',
+            'pinterest_url' => 'nullable|url|max:255',
+            'twitter_url' => 'nullable|url|max:255',
+            'linkedin_url' => 'nullable|url|max:255',
         ];
     }
 
@@ -53,6 +59,11 @@ class UpdateCompanyDetailRequest extends FormRequest
             'support_email.email' => 'Support email must be a valid email address.',
             'email_primary.email' => 'Primary email must be a valid email address.',
             'email_secondary.email' => 'Secondary email must be a valid email address.',
+            'youtube_url.url' => 'YouTube link must be a valid URL.',
+            'facebook_url.url' => 'Facebook link must be a valid URL.',
+            'pinterest_url.url' => 'Pinterest link must be a valid URL.',
+            'twitter_url.url' => 'Twitter link must be a valid URL.',
+            'linkedin_url.url' => 'LinkedIn link must be a valid URL.',
         ];
     }
 }
