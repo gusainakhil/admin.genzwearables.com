@@ -20,6 +20,16 @@ class SettingsController extends Controller
             'razorpay_key_id' => Setting::get('razorpay_key_id', ''),
             'razorpay_key_secret' => Setting::get('razorpay_key_secret', ''),
             'razorpay_enabled' => Setting::get('razorpay_enabled', '1'),
+            'authkey_api_key' => Setting::get('authkey_api_key', ''),
+            'authkey_sender_id' => Setting::get('authkey_sender_id', ''),
+            'authkey_template_id' => Setting::get('authkey_template_id', ''),
+            'smtp_host' => Setting::get('smtp_host', ''),
+            'smtp_port' => Setting::get('smtp_port', ''),
+            'smtp_username' => Setting::get('smtp_username', ''),
+            'smtp_password' => Setting::get('smtp_password', ''),
+            'smtp_encryption' => Setting::get('smtp_encryption', ''),
+            'smtp_from_address' => Setting::get('smtp_from_address', ''),
+            'smtp_from_name' => Setting::get('smtp_from_name', ''),
         ];
 
         $shipmentApiCredential = ShipmentApiKey::query()->where('provider', 'shiprocket')->first();
@@ -47,6 +57,20 @@ class SettingsController extends Controller
                 'regex:/^[A-Za-z0-9]{16,}$/',
             ],
             'razorpay_enabled' => 'nullable|boolean',
+            'authkey_api_key' => [
+                'nullable',
+                'string',
+                'max:255',
+            ],
+            'authkey_sender_id' => 'nullable|string|max:50',
+            'authkey_template_id' => 'nullable|string|max:100',
+            'smtp_host' => 'nullable|string|max:255',
+            'smtp_port' => 'nullable|integer|min:1|max:65535',
+            'smtp_username' => 'nullable|string|max:255',
+            'smtp_password' => 'nullable|string|max:255',
+            'smtp_encryption' => 'nullable|in:tls,ssl',
+            'smtp_from_address' => 'nullable|email|max:255',
+            'smtp_from_name' => 'nullable|string|max:255',
         ], [
             'razorpay_key_id.required_if' => 'Razorpay Key ID is required when Razorpay is enabled.',
             'razorpay_key_id.required_with' => 'Razorpay Key ID is required when Key Secret is provided.',
@@ -54,7 +78,19 @@ class SettingsController extends Controller
             'razorpay_key_secret.required_if' => 'Razorpay Key Secret is required when Razorpay is enabled.',
             'razorpay_key_secret.required_with' => 'Razorpay Key Secret is required when Key ID is provided.',
             'razorpay_key_secret.regex' => 'Razorpay Key Secret format looks invalid.',
+            'authkey_api_key.max' => 'Authkey API Key must not exceed 255 characters.',
+            'authkey_sender_id.max' => 'Authkey Sender ID must not exceed 50 characters.',
+            'authkey_template_id.max' => 'Authkey Template ID must not exceed 100 characters.',
+            'smtp_port.integer' => 'SMTP port must be a valid number.',
+            'smtp_port.min' => 'SMTP port must be at least 1.',
+            'smtp_port.max' => 'SMTP port must not exceed 65535.',
+            'smtp_encryption.in' => 'SMTP encryption must be tls or ssl.',
+            'smtp_from_address.email' => 'SMTP from address must be a valid email address.',
         ]);
+
+        if (array_key_exists('smtp_password', $validated) && blank($validated['smtp_password'])) {
+            unset($validated['smtp_password']);
+        }
 
         foreach ($validated as $key => $value) {
             Setting::set($key, $value ?? '');
