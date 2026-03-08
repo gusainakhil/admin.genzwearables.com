@@ -39,6 +39,7 @@ Route::get('/products/{product}', [ProductController::class, 'show']);
 Route::get('/products/{product}/reviews', [ProductController::class, 'reviews']);
 
 Route::middleware('auth:sanctum')->post('/products/{product}/reviews', [ProductController::class, 'storeReview']);
+Route::middleware('auth:sanctum')->patch('/products/{product}/reviews/{review}', [ProductController::class, 'updateReview']);
 
 Route::middleware('auth:sanctum')->get('/wishlist', [WishlistController::class, 'index']);
 Route::middleware('auth:sanctum')->post('/wishlist', [WishlistController::class, 'store']);

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Api\UpdateReviewRequest;
 use App\Models\Category;
 use App\Models\Product;
 use App\Models\Review;
@@ -173,6 +174,24 @@ class ProductController extends Controller
             'message' => 'Review submitted',
             'data' => $review,
         ], 201);
+    }
+
+    public function updateReview(UpdateReviewRequest $request, Product $product, Review $review)
+    {
+        if ($product->status !== 'active') {
+            return response()->json([
+                'status' => false,
+                'message' => 'Product not found',
+            ], 404);
+        }
+
+        $review->update($request->validated());
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Review updated',
+            'data' => $review->fresh(),
+        ]);
     }
 
     private function transformProduct(Product $product, bool $includeVariants = false, bool $includeReviews = false): array
