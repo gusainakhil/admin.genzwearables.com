@@ -16,7 +16,8 @@ use App\Http\Controllers\Api\WishlistController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('auth')->group(function () {
-    Route::post('/register', [AuthController::class, 'register']);
+    Route::post('/register/otp', [AuthController::class, 'requestRegistrationOtp']);
+    Route::post('/register', [AuthController::class, 'completeRegistration']);
     Route::post('/login', [AuthController::class, 'login']);
     Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
     Route::post('/reset-password', [AuthController::class, 'resetPassword']);
@@ -67,5 +68,6 @@ Route::middleware('auth:sanctum')->delete('/addresses/{address}', [UserAddressCo
 Route::middleware('auth:sanctum')->post('/orders/checkout', [OrderController::class, 'store']);
 Route::middleware('auth:sanctum')->get('/orders', [OrderController::class, 'index']);
 Route::middleware('auth:sanctum')->get('/orders/{order}', [OrderController::class, 'show']);
+Route::middleware('auth:sanctum')->get('/orders/{orderReference}/invoice/download', [OrderController::class, 'downloadInvoice']);
 Route::middleware('auth:sanctum')->patch('/orders/{order}/payment', [OrderController::class, 'updatePayment']);
 Route::middleware('auth:sanctum')->post('/orders/payment/sync', [OrderController::class, 'syncRazorpayPayment']);

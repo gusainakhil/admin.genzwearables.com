@@ -9,6 +9,7 @@ use App\Http\Requests\Api\UpdateOrderPaymentRequest;
 use App\Mail\OrderPaid;
 use App\Mail\OrderPlaced;
 use App\Models\Cart;
+use App\Models\CompanyDetail;
 use App\Models\Coupon;
 use App\Models\Order;
 use App\Models\OrderItem;
@@ -24,6 +25,7 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Razorpay\Api\Api;
 use Razorpay\Api\Errors\Error as RazorpayError;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class OrderController extends Controller
 {
@@ -185,6 +187,42 @@ class OrderController extends Controller
                 'items' => $items,
                 'created_at' => $order->created_at,
             ],
+        ]);
+    }
+
+    public function downloadInvoice(Request $request, string $orderReference): JsonResponse|StreamedResponse
+    {
+        $order = Order::query()
+            ->where('user_id', $request->user()->id)
+            ->where(function ($query) use ($orderReference): void {
+                if (ctype_digit($orderReference)) {
+                    $query->whereKey((int) $orderReference)
+                        ->orWhere('order_number', $orderReference);
+
+                    return;
+                }
+
+                $query->where('order_number', $orderReference);
+            })
+            ->first();
+
+        if (! $order) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Order not found',
+            ], 404);
+        }
+
+        $order->load('user', 'address', 'items.product', 'items.variant.size', 'items.variant.color', 'payment', 'shipment');
+        $companyDetail = CompanyDetail::query()->first();
+
+        $fileName = 'invoice-'.$order->order_number.'.html';
+        $html = view('admin.orders.print-invoice', compact('order', 'companyDetail'))->render();
+
+        return response()->streamDownload(function () use ($html): void {
+            echo $html;
+        }, $fileName, [
+            'Content-Type' => 'text/html; charset=UTF-8',
         ]);
     }
 

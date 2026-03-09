@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Setting;
 use App\Models\User;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
@@ -16,11 +17,38 @@ use Illuminate\Validation\Rules\Password;
 
 class AuthController extends Controller
 {
+    public function requestRegistrationOtp(Request $request): JsonResponse
+    {
+        $request->request->remove('otp');
+        $request->request->remove('sms_otp');
+
+        return $this->register($request);
+    }
+
+    public function completeRegistration(Request $request): JsonResponse
+    {
+        $otpValidator = Validator::make($request->all(), [
+            'otp' => 'required_without:sms_otp|digits:6',
+            'sms_otp' => 'required_without:otp|digits:6',
+        ]);
+
+        if ($otpValidator->fails()) {
+            return response()->json([
+                'status' => false,
+                'message' => 'SMS OTP is required for verification.',
+                'errors' => $otpValidator->errors(),
+            ], 422);
+        }
+
+        return $this->register($request);
+    }
+
     public function register(Request $request): JsonResponse
     {
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
-            'phone' => 'required|string|max:20',
+            'email' => 'nullable|email|max:150|unique:users,email',
+            'phone' => 'required|string|max:20|unique:users,phone',
             'password' => ['required', 'confirmed', Password::min(6)],
             'otp' => 'nullable|digits:6',
             'sms_otp' => 'nullable|digits:6',
@@ -157,16 +185,28 @@ class AuthController extends Controller
 
         Cache::forget($otpCacheKey);
  
-        $user = User::create([
-            'name' => $validated['name'],
-            'email' => null,
-            'phone' => $validated['phone'],
-            'password' => Hash::make($validated['password']),
-            'role' => 'customer',
-            'status' => 'active',
-        ]);
+        try {
+            $registrationEmail = filled($validated['email'] ?? null)
+                ? strtolower(trim((string) $validated['email']))
+                : $this->buildFallbackRegistrationEmail($validated['phone']);
 
-        $token = $user->createToken('api')->plainTextToken;
+            $user = User::create([
+                'name' => $validated['name'],
+                'email' => $registrationEmail,
+                'phone' => $validated['phone'],
+                'password' => Hash::make($validated['password']),
+                'role' => 'customer',
+                'status' => 'active',
+            ]);
+
+            $token = $user->createToken('api')->plainTextToken;
+        } catch (QueryException $exception) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Registration failed. Please try again later.',
+                'debug_message' => app()->hasDebugModeEnabled() ? $exception->getMessage() : null,
+            ], 503);
+        }
 
         return response()->json([
             'status' => true,
@@ -182,6 +222,17 @@ class AuthController extends Controller
     private function otpCacheKey(string $phone): string
     {
         return 'register_otp:'.sha1(trim($phone));
+    }
+
+    private function buildFallbackRegistrationEmail(string $phone): string
+    {
+        $normalizedPhone = preg_replace('/\D+/', '', $phone);
+
+        if (blank($normalizedPhone)) {
+            $normalizedPhone = Str::lower((string) Str::ulid());
+        }
+
+        return 'phone_'.$normalizedPhone.'@genzwearables.local';
     }
 
 
@@ -488,6 +539,9 @@ class AuthController extends Controller
                 'data' => [
                     'otp_required' => true,
                     'otp_expires_in_seconds' => 600,
+                    'otp_preview' => [
+                        'otp' => $resetOtp,
+                    ],
                 ],
             ], 422);
         }
@@ -498,6 +552,9 @@ class AuthController extends Controller
             'data' => [
                 'otp_required' => true,
                 'otp_expires_in_seconds' => 600,
+                'otp_preview' => [
+                    'otp' => $resetOtp,
+                ],
             ],
         ]);
     }

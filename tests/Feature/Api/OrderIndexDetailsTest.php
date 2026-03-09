@@ -235,6 +235,91 @@ class OrderIndexDetailsTest extends TestCase
         $this->assertStringContainsString('/storage/products/oversized-tee-main.jpg', (string) $imageUrl);
     }
 
+    public function test_user_can_download_own_order_invoice_html(): void
+    {
+        $user = User::factory()->create();
+
+        $order = Order::query()->create([
+            'user_id' => $user->id,
+            'order_number' => 'ORD-INVOICE-1004',
+            'subtotal' => 1000,
+            'shipping' => 50,
+            'discount' => 0,
+            'total' => 1050,
+            'payment_status' => 'pending',
+            'order_status' => 'placed',
+        ]);
+
+        Sanctum::actingAs($user);
+
+        $response = $this->get('/api/orders/'.$order->id.'/invoice/download');
+
+        $response
+            ->assertOk()
+            ->assertHeader('content-type', 'text/html; charset=UTF-8');
+
+        $contentDisposition = (string) $response->headers->get('content-disposition');
+
+        $this->assertStringContainsString('attachment;', $contentDisposition);
+        $this->assertStringContainsString('invoice-ORD-INVOICE-1004.html', $contentDisposition);
+        $this->assertStringContainsString('Tax Invoice', $response->streamedContent());
+        $this->assertStringContainsString('ORD-INVOICE-1004', $response->streamedContent());
+    }
+
+    public function test_user_can_download_invoice_using_order_number_reference(): void
+    {
+        $user = User::factory()->create();
+
+        $order = Order::query()->create([
+            'user_id' => $user->id,
+            'order_number' => 'ORD-4N2VOJWMWJ',
+            'subtotal' => 1000,
+            'shipping' => 50,
+            'discount' => 0,
+            'total' => 1050,
+            'payment_status' => 'pending',
+            'order_status' => 'placed',
+        ]);
+
+        Sanctum::actingAs($user);
+
+        $response = $this->get('/api/orders/'.$order->order_number.'/invoice/download');
+
+        $response
+            ->assertOk()
+            ->assertHeader('content-type', 'text/html; charset=UTF-8');
+
+        $contentDisposition = (string) $response->headers->get('content-disposition');
+
+        $this->assertStringContainsString('attachment;', $contentDisposition);
+        $this->assertStringContainsString('invoice-ORD-4N2VOJWMWJ.html', $contentDisposition);
+        $this->assertStringContainsString('ORD-4N2VOJWMWJ', $response->streamedContent());
+    }
+
+    public function test_user_cannot_download_other_user_order_invoice(): void
+    {
+        $user = User::factory()->create();
+        $otherUser = User::factory()->create();
+
+        $order = Order::query()->create([
+            'user_id' => $otherUser->id,
+            'order_number' => 'ORD-INVOICE-1005',
+            'subtotal' => 800,
+            'shipping' => 0,
+            'discount' => 0,
+            'total' => 800,
+            'payment_status' => 'pending',
+            'order_status' => 'placed',
+        ]);
+
+        Sanctum::actingAs($user);
+
+        $this->getJson('/api/orders/'.$order->id.'/invoice/download')
+            ->assertNotFound()
+            ->assertJsonPath('status', false)
+            ->assertJsonPath('message', 'Order not found');
+    }
+
     private function setRazorpaySettings(): void
     {
         Setting::set('razorpay_enabled', '1');
