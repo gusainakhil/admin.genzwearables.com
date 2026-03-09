@@ -16,6 +16,30 @@ use Intervention\Image\ImageManager;
 
 class ProductController extends Controller
 {
+    private function generateUniqueSlug(string $name, ?int $ignoreId = null, bool $appendAlphabet = false): string
+    {
+        $baseSlug = Str::slug($name);
+
+        if ($appendAlphabet) {
+            $baseSlug .= '-'.Str::lower(Str::random(3));
+        }
+
+        $slug = $baseSlug;
+        $counter = 1;
+
+        while (
+            Product::query()
+                ->when($ignoreId, fn ($query) => $query->where('id', '!=', $ignoreId))
+                ->where('slug', $slug)
+                ->exists()
+        ) {
+            $slug = $baseSlug.'-'.$counter;
+            $counter++;
+        }
+
+        return $slug;
+    }
+
     public function index()
     {
         $products = Product::with('category')->latest()->paginate(20);
@@ -51,7 +75,7 @@ class ProductController extends Controller
             'og_image' => 'nullable|string|max:500',
         ]);
 
-        $validated['slug'] = Str::slug($validated['name']);
+        $validated['slug'] = $this->generateUniqueSlug($validated['name']);
         $validated['is_custom'] = $request->has('is_custom');
 
         $product = Product::create($validated);
@@ -89,7 +113,7 @@ class ProductController extends Controller
             'og_image' => 'nullable|string|max:500',
         ]);
 
-        $validated['slug'] = Str::slug($validated['name']);
+        $validated['slug'] = $this->generateUniqueSlug($validated['name'], $product->id, true);
         $validated['is_custom'] = $request->has('is_custom');
 
         $product->update($validated);

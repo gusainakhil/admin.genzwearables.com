@@ -9,6 +9,30 @@ use Illuminate\Support\Str;
 
 class CategoryController extends Controller
 {
+    private function generateUniqueSlug(string $name, ?int $ignoreId = null, bool $appendAlphabet = false): string
+    {
+        $baseSlug = Str::slug($name);
+
+        if ($appendAlphabet) {
+            $baseSlug .= '-'.Str::lower(Str::random(3));
+        }
+
+        $slug = $baseSlug;
+        $counter = 1;
+
+        while (
+            Category::query()
+                ->when($ignoreId, fn ($query) => $query->where('id', '!=', $ignoreId))
+                ->where('slug', $slug)
+                ->exists()
+        ) {
+            $slug = $baseSlug.'-'.$counter;
+            $counter++;
+        }
+
+        return $slug;
+    }
+
     public function index()
     {
         $categories = Category::with('parent')->orderBy('name')->paginate(20);
@@ -32,7 +56,7 @@ class CategoryController extends Controller
             'status' => 'required|in:active,inactive',
         ]);
 
-        $validated['slug'] = Str::slug($validated['name']);
+        $validated['slug'] = $this->generateUniqueSlug($validated['name']);
 
         if ($request->hasFile('image')) {
             $validated['image'] = $request->file('image')->store('categories', 'public');
@@ -62,7 +86,7 @@ class CategoryController extends Controller
             'status' => 'required|in:active,inactive',
         ]);
 
-        $validated['slug'] = Str::slug($validated['name']);
+        $validated['slug'] = $this->generateUniqueSlug($validated['name'], $category->id, true);
 
         if ($request->hasFile('image')) {
             if ($category->image) {
