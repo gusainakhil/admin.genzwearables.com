@@ -3,8 +3,6 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Mail\RegisterOtpMail;
-use App\Models\CompanyDetail;
 use App\Models\Setting;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
@@ -12,7 +10,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\Password;
@@ -23,11 +20,9 @@ class AuthController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
-            'email' => 'required|email|max:255|unique:users,email',
             'phone' => 'required|string|max:20',
             'password' => ['required', 'confirmed', Password::min(6)],
             'otp' => 'nullable|digits:6',
-            'email_otp' => 'nullable|digits:6',
             'sms_otp' => 'nullable|digits:6',
         ]);
 
@@ -41,30 +36,15 @@ class AuthController extends Controller
 
         $validated = $validator->validated();
 
-        $otpCacheKey = $this->otpCacheKey($validated['email'], $validated['phone']);
-        $emailOtpInput = (string) ($validated['email_otp'] ?? $validated['otp'] ?? '');
+        $otpCacheKey = $this->otpCacheKey($validated['phone']);
         $smsOtpInput = (string) ($validated['sms_otp'] ?? $validated['otp'] ?? '');
 
-        if (blank($emailOtpInput) && blank($smsOtpInput)) {
-            $emailOtp = (string) random_int(100000, 999999);
+        if (blank($smsOtpInput)) {
             $smsOtp = (string) random_int(100000, 999999);
 
             Cache::put($otpCacheKey, [
-                'email_otp_hash' => Hash::make($emailOtp),
                 'sms_otp_hash' => Hash::make($smsOtp),
             ], now()->addMinutes(10));
-
-            try {
-                $emailDelivery = $this->sendRegistrationOtpEmail($validated['email'], $emailOtp);
-            } catch (\Throwable $exception) {
-                $emailDelivery = [
-                    'channel' => 'email',
-                    'sent' => false,
-                    'reason' => app()->hasDebugModeEnabled()
-                        ? $exception->getMessage()
-                        : 'Email delivery failed.',
-                ];
-            }
 
             try {
                 $smsDelivery = $this->sendRegistrationOtpSms($validated['phone'], $smsOtp);
@@ -78,82 +58,71 @@ class AuthController extends Controller
                 ];
             }
 
-            if (! $emailDelivery['sent'] && ! $smsDelivery['sent'] && $this->canBypassOtpDelivery()) {
+            if (! $smsDelivery['sent'] && $this->canBypassOtpDelivery()) {
                 return response()->json([
                     'status' => true,
                     'message' => 'OTP generated in debug bypass mode. Complete provider setup for real delivery.',
                     'data' => [
                         'otp_required' => true,
-                        'email_otp_required' => true,
                         'sms_otp_required' => true,
                         'otp_expires_in_seconds' => 600,
                         'otp_preview' => [
-                            'email_otp' => $emailOtp,
                             'sms_otp' => $smsOtp,
                         ],
                         'bypass_mode' => true,
                         'delivery' => [
-                            'email' => $this->formatDeliveryStatus($emailDelivery),
                             'sms' => $this->formatDeliveryStatus($smsDelivery),
                         ],
-                        'delivery_note' => 'sent=true means request submitted to provider. Final inbox or handset delivery must be verified in provider logs.',
+                        'delivery_note' => 'sent=true means request submitted to provider. Final handset delivery must be verified in provider logs.',
                     ],
                 ]);
             }
 
-            if (! $emailDelivery['sent'] && ! $smsDelivery['sent']) {
+            if (! $smsDelivery['sent']) {
                 Cache::forget($otpCacheKey);
 
                 $responseData = [
                     'otp_required' => true,
-                    'email_otp_required' => true,
                     'sms_otp_required' => true,
                     'otp_expires_in_seconds' => 600,
                     'delivery' => [
-                        'email' => $this->formatDeliveryStatus($emailDelivery),
                         'sms' => $this->formatDeliveryStatus($smsDelivery),
                     ],
-                    'delivery_note' => 'sent=true means request submitted to provider. Final inbox or handset delivery must be verified in provider logs.',
+                    'delivery_note' => 'sent=true means request submitted to provider. Final handset delivery must be verified in provider logs.',
                 ];
 
                 if ($this->canBypassOtpDelivery()) {
                     $responseData['otp_preview'] = [
-                        'email_otp' => $emailOtp,
                         'sms_otp' => $smsOtp,
                     ];
                 }
 
                 return response()->json([
                     'status' => false,
-                    'message' => 'OTP could not be delivered on email or SMS. Please check configuration.',
+                    'message' => 'OTP could not be delivered via SMS. Please check configuration.',
                     'data' => $responseData,
                 ], 422);
             }
 
             $responseData = [
                 'otp_required' => true,
-                'email_otp_required' => true,
                 'sms_otp_required' => true,
                 'otp_expires_in_seconds' => 600,
                 'delivery' => [
-                    'email' => $this->formatDeliveryStatus($emailDelivery),
                     'sms' => $this->formatDeliveryStatus($smsDelivery),
                 ],
-                'delivery_note' => 'sent=true means request submitted to provider. Final inbox or handset delivery must be verified in provider logs.',
+                'delivery_note' => 'sent=true means request submitted to provider. Final handset delivery must be verified in provider logs.',
             ];
 
             if ($this->canBypassOtpDelivery()) {
                 $responseData['otp_preview'] = [
-                    'email_otp' => $emailOtp,
                     'sms_otp' => $smsOtp,
                 ];
             }
 
             return response()->json([
                 'status' => true,
-                'message' => $emailDelivery['sent'] && $smsDelivery['sent']
-                    ? 'OTP sent successfully to email and mobile number'
-                    : 'OTP sent partially. Please verify delivery channels.',
+                'message' => 'OTP sent successfully to mobile number.',
                 'data' => $responseData,
             ]);
         }
@@ -162,7 +131,6 @@ class AuthController extends Controller
 
         if (
             ! is_array($cachedOtpData)
-            || blank($cachedOtpData['email_otp_hash'] ?? null)
             || blank($cachedOtpData['sms_otp_hash'] ?? null)
         ) {
             return response()->json([
@@ -171,16 +139,15 @@ class AuthController extends Controller
             ], 422);
         }
 
-        if (blank($emailOtpInput) || blank($smsOtpInput)) {
+        if (blank($smsOtpInput)) {
             return response()->json([
                 'status' => false,
-                'message' => 'Both email_otp and sms_otp are required for verification.',
+                'message' => 'SMS OTP is required for verification.',
             ], 422);
         }
 
         if (
-            ! Hash::check($emailOtpInput, (string) ($cachedOtpData['email_otp_hash'] ?? ''))
-            || ! Hash::check($smsOtpInput, (string) ($cachedOtpData['sms_otp_hash'] ?? ''))
+            ! Hash::check($smsOtpInput, (string) ($cachedOtpData['sms_otp_hash'] ?? ''))
         ) {
             return response()->json([
                 'status' => false,
@@ -192,7 +159,7 @@ class AuthController extends Controller
  
         $user = User::create([
             'name' => $validated['name'],
-            'email' => $validated['email'],
+            'email' => null,
             'phone' => $validated['phone'],
             'password' => Hash::make($validated['password']),
             'role' => 'customer',
@@ -212,163 +179,12 @@ class AuthController extends Controller
         ], 201);
     }
 
-    private function otpCacheKey(string $email, string $phone): string
+    private function otpCacheKey(string $phone): string
     {
-        return 'register_otp:'.sha1(strtolower(trim($email)).'|'.trim($phone));
+        return 'register_otp:'.sha1(trim($phone));
     }
 
-    /**
-     * @return array{channel:string,sent:bool,reason:?string}
-     */
-    private function sendRegistrationOtpEmail(string $email, string $otp): array
-    {
-        $this->applyOtpMailConfigurationFromSettings();
 
-        $mailer = (string) config('mail.default');
-
-        if (in_array($mailer, ['log', 'array'], true)) {
-            return [
-                'channel' => 'email',
-                'sent' => false,
-                'reason' => 'MAIL_MAILER is set to '.$mailer.'. Configure SMTP for real email delivery.',
-            ];
-        }
-
-        $companyDetail = CompanyDetail::query()->first();
-
-        $brandName = (string) (config('mail.from.name') ?: $companyDetail?->brand_name ?: config('app.name'));
-        $smtpUsername = (string) config('mail.mailers.smtp.username');
-        $fromAddress = (string) (config('mail.from.address') ?: $smtpUsername ?: $companyDetail?->email_secondary);
-
-        if (blank($fromAddress)) {
-            return [
-                'channel' => 'email',
-                'sent' => false,
-                'reason' => 'Sender email is missing. Set company_details.email_secondary or MAIL_FROM_ADDRESS.',
-            ];
-        }
-
-        $smtpHost = (string) config('mail.mailers.smtp.host');
-        $smtpPort = (int) config('mail.mailers.smtp.port');
-        $smtpScheme = config('mail.mailers.smtp.scheme');
-
-        $transports = [
-            [
-                'host' => $smtpHost,
-                'port' => $smtpPort,
-                'scheme' => $smtpScheme,
-                'label' => 'configured',
-            ],
-            [
-                'host' => $smtpHost,
-                'port' => 587,
-                'scheme' => 'smtp',
-                'label' => 'fallback-587',
-            ],
-            [
-                'host' => $smtpHost,
-                'port' => 465,
-                'scheme' => 'smtps',
-                'label' => 'fallback-465',
-            ],
-        ];
-
-        if (strtolower(trim($smtpHost)) === 'smtp.gmail.com') {
-            $transports[] = [
-                'host' => $smtpHost,
-                'port' => 25,
-                'scheme' => 'smtp',
-                'label' => 'gmail-25',
-            ];
-        }
-
-        $transports = collect($transports)
-            ->unique(fn (array $transport) => $transport['host'].'|'.$transport['port'].'|'.(string) $transport['scheme'])
-            ->values()
-            ->all();
-
-        $attemptReasons = [];
-
-        foreach ($transports as $transport) {
-            config([
-                'mail.mailers.smtp.host' => $transport['host'],
-                'mail.mailers.smtp.port' => $transport['port'],
-                'mail.mailers.smtp.scheme' => $transport['scheme'],
-            ]);
-
-            app('mail.manager')->forgetMailers();
-
-            try {
-                Mail::to($email)->send(new RegisterOtpMail($brandName, $otp, $fromAddress));
-
-                return [
-                    'channel' => 'email',
-                    'sent' => true,
-                    'reason' => null,
-                ];
-            } catch (\Throwable $exception) {
-                $attemptReasons[] = $transport['label'].' failed: '.Str::limit($exception->getMessage(), 140);
-            }
-        }
-
-        try {
-            app('mail.manager')->forgetMailers();
-            Mail::mailer('sendmail')->to($email)->send(new RegisterOtpMail($brandName, $otp, $fromAddress));
-
-            return [
-                'channel' => 'email',
-                'sent' => true,
-                'reason' => null,
-            ];
-        } catch (\Throwable $exception) {
-            $attemptReasons[] = 'sendmail failed: '.Str::limit($exception->getMessage(), 140);
-        }
-
-        return [
-            'channel' => 'email',
-            'sent' => false,
-            'reason' => filled($attemptReasons)
-                ? Str::limit(implode(' | ', $attemptReasons), 450)
-                : 'Email delivery failed for all configured SMTP transports.',
-        ];
-    }
-
-    private function applyOtpMailConfigurationFromSettings(): void
-    {
-        $smtpHost = trim((string) Setting::get('smtp_host', ''));
-        $smtpPort = trim((string) Setting::get('smtp_port', ''));
-        $smtpUsername = trim((string) Setting::get('smtp_username', ''));
-        $smtpPassword = (string) Setting::get('smtp_password', '');
-        $smtpEncryption = trim((string) Setting::get('smtp_encryption', ''));
-        $smtpFromAddress = trim((string) Setting::get('smtp_from_address', ''));
-        $smtpFromName = trim((string) Setting::get('smtp_from_name', ''));
-
-        $smtpPortInt = (int) $smtpPort;
-
-        $smtpScheme = match (true) {
-            $smtpPortInt === 465 => 'smtps',
-            $smtpPortInt === 587 => 'smtp',
-            $smtpEncryption === 'ssl' => 'smtps',
-            $smtpEncryption === 'tls' => 'smtp',
-            default => null,
-        };
-
-        if (blank($smtpHost) || blank($smtpPort)) {
-            return;
-        }
-
-        config([
-            'mail.default' => 'smtp',
-            'mail.mailers.smtp.host' => $smtpHost,
-            'mail.mailers.smtp.port' => $smtpPortInt,
-            'mail.mailers.smtp.username' => blank($smtpUsername) ? null : $smtpUsername,
-            'mail.mailers.smtp.password' => blank($smtpPassword) ? null : $smtpPassword,
-            'mail.mailers.smtp.scheme' => $smtpScheme,
-            'mail.mailers.smtp.timeout' => 8,
-            'mail.from.address' => blank($smtpFromAddress) ? config('mail.from.address') : $smtpFromAddress,
-            'mail.from.name' => blank($smtpFromName) ? config('mail.from.name') : $smtpFromName,
-        ]);
-    }
 
     /**
      * @return array{channel:string,sent:bool,reason:?string}
@@ -566,11 +382,11 @@ class AuthController extends Controller
     public function login(Request $request)
     {
         $validated = $request->validate([
-            'email' => 'required|email',
+            'phone' => 'required|string',
             'password' => 'required|string',
         ]);
 
-        $user = User::where('email', $validated['email'])->first();
+        $user = User::where('phone', $validated['phone'])->first();
 
         if (! $user || ! Hash::check($validated['password'], $user->password)) {
             return response()->json([
@@ -612,5 +428,220 @@ class AuthController extends Controller
             'status' => true,
             'message' => 'Logged out successfully',
         ]);
+    }
+
+    public function forgotPassword(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'phone' => 'required|string|max:20',
+        ]);
+
+        $user = User::where('phone', $validated['phone'])->first();
+
+        if (! $user) {
+            return response()->json([
+                'status' => false,
+                'message' => 'User not found with this phone number.',
+            ], 404);
+        }
+
+        $otpCacheKey = $this->forgotPasswordOtpCacheKey($validated['phone']);
+        $resetOtp = (string) random_int(100000, 999999);
+
+        Cache::put($otpCacheKey, [
+            'otp_hash' => Hash::make($resetOtp),
+        ], now()->addMinutes(10));
+
+        try {
+            $smsDelivery = $this->sendForgotPasswordOtpSms($validated['phone'], $resetOtp);
+        } catch (\Throwable $exception) {
+            $smsDelivery = [
+                'channel' => 'sms',
+                'sent' => false,
+                'reason' => app()->hasDebugModeEnabled()
+                    ? $exception->getMessage()
+                    : 'SMS delivery failed.',
+            ];
+        }
+
+        if (! $smsDelivery['sent'] && $this->canBypassOtpDelivery()) {
+            return response()->json([
+                'status' => true,
+                'message' => 'OTP generated in debug bypass mode.',
+                'data' => [
+                    'otp_required' => true,
+                    'otp_expires_in_seconds' => 600,
+                    'otp_preview' => [
+                        'otp' => $resetOtp,
+                    ],
+                    'bypass_mode' => true,
+                ],
+            ]);
+        }
+
+        if (! $smsDelivery['sent']) {
+            Cache::forget($otpCacheKey);
+
+            return response()->json([
+                'status' => false,
+                'message' => 'OTP could not be delivered via SMS. Please check configuration.',
+                'data' => [
+                    'otp_required' => true,
+                    'otp_expires_in_seconds' => 600,
+                ],
+            ], 422);
+        }
+
+        return response()->json([
+            'status' => true,
+            'message' => 'OTP sent successfully to your mobile number.',
+            'data' => [
+                'otp_required' => true,
+                'otp_expires_in_seconds' => 600,
+            ],
+        ]);
+    }
+
+    public function resetPassword(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'phone' => 'required|string|max:20',
+            'otp' => 'required|digits:6',
+            'password' => ['required', 'confirmed', Password::min(6)],
+        ]);
+
+        $user = User::where('phone', $validated['phone'])->first();
+
+        if (! $user) {
+            return response()->json([
+                'status' => false,
+                'message' => 'User not found with this phone number.',
+            ], 404);
+        }
+
+        $otpCacheKey = $this->forgotPasswordOtpCacheKey($validated['phone']);
+        $cachedOtpData = Cache::get($otpCacheKey);
+
+        if (! is_array($cachedOtpData) || blank($cachedOtpData['otp_hash'] ?? null)) {
+            return response()->json([
+                'status' => false,
+                'message' => 'OTP expired or not found. Please request a new OTP.',
+            ], 422);
+        }
+
+        if (! Hash::check($validated['otp'], (string) ($cachedOtpData['otp_hash'] ?? ''))) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Invalid OTP.',
+            ], 422);
+        }
+
+        Cache::forget($otpCacheKey);
+
+        $user->update([
+            'password' => Hash::make($validated['password']),
+        ]);
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Password reset successfully. You can now login with your new password.',
+        ]);
+    }
+
+    private function forgotPasswordOtpCacheKey(string $phone): string
+    {
+        return 'forgot_password_otp:'.sha1(trim($phone));
+    }
+
+    /**
+     * @return array{channel:string,sent:bool,reason:?string}
+     */
+    private function sendForgotPasswordOtpSms(string $phone, string $otp): array
+    {
+        $authkeyApiKey = (string) Setting::get('authkey_api_key', '');
+        $authkeySenderId = trim((string) Setting::get('authkey_sender_id', ''));
+        $authkeyTemplateId = trim((string) Setting::get('authkey_template_id', ''));
+
+        if (blank($authkeyApiKey)) {
+            return [
+                'channel' => 'sms',
+                'sent' => false,
+                'reason' => 'Authkey API key is missing in settings.',
+            ];
+        }
+
+        $normalizedPhone = preg_replace('/\D+/', '', $phone);
+
+        if (blank($normalizedPhone)) {
+            return [
+                'channel' => 'sms',
+                'sent' => false,
+                'reason' => 'Phone number is invalid.',
+            ];
+        }
+
+        $mobileCandidates = collect([
+            $normalizedPhone,
+            '91'.$normalizedPhone,
+            '+91'.$normalizedPhone,
+        ])->unique()->values();
+
+        $failureReasons = [];
+
+        foreach ($mobileCandidates as $mobileCandidate) {
+            $requestVariants = [
+                [
+                    'authkey' => $authkeyApiKey,
+                    'mobile' => $mobileCandidate,
+                    'country_code' => 91,
+                    'otp' => $otp,
+                ],
+                [
+                    'authkey' => $authkeyApiKey,
+                    'mobile' => $mobileCandidate,
+                    'country_code' => 91,
+                ],
+            ];
+
+            if (filled($authkeySenderId)) {
+                $requestVariants[0]['sid'] = $authkeySenderId;
+                $requestVariants[1]['sid'] = $authkeySenderId;
+            }
+
+            if (filled($authkeyTemplateId)) {
+                $requestVariants[0]['template_id'] = $authkeyTemplateId;
+                $requestVariants[1]['template_id'] = $authkeyTemplateId;
+            }
+
+            foreach ($requestVariants as $variantIndex => $queryParams) {
+                $response = Http::connectTimeout(3)
+                    ->timeout(5)
+                    ->acceptJson()
+                    ->get('https://api.authkey.io/request', $queryParams);
+
+                $delivery = $this->parseAuthkeyResponse($response);
+
+                if ($delivery['sent']) {
+                    return [
+                        'channel' => 'sms',
+                        'sent' => true,
+                        'reason' => null,
+                    ];
+                }
+
+                if (filled($delivery['reason'])) {
+                    $attempt = $variantIndex === 0 ? 'with-otp' : 'without-otp';
+                    $failureReasons[] = 'mobile '.$mobileCandidate.' ('.$attempt.'): '.$delivery['reason'];
+                }
+            }
+        }
+
+        return [
+            'channel' => 'sms',
+            'sent' => false,
+            'reason' => filled($failureReasons)
+                ? Str::limit(implode(' | ', array_unique($failureReasons)), 450)
+                : 'Authkey response could not be verified as successful.',
+        ];
     }
 }
