@@ -331,6 +331,11 @@ class OrderController extends Controller
 
                     $mailRequired = true;
 
+                    Cart::query()
+                        ->where('user_id', $freshOrder->user_id)
+                        ->get()
+                        ->each(fn ($cart) => $cart->items()->delete());
+
                     Payment::updateOrCreate(
                         ['order_id' => $freshOrder->id],
                         [
@@ -578,8 +583,6 @@ class OrderController extends Controller
                 'response' => $gatewayResponse ? json_encode($gatewayResponse) : null,
             ]);
 
-            $cart->items()->delete();
-
             return $order;
         });
 
@@ -672,6 +675,11 @@ class OrderController extends Controller
 
                         $variant->decrement('stock_qty', $item->quantity);
                     }
+
+                    Cart::query()
+                        ->where('user_id', $order->user_id)
+                        ->get()
+                        ->each(fn ($cart) => $cart->items()->delete());
                 }
 
                 $order->update([
@@ -826,6 +834,11 @@ class OrderController extends Controller
                         ]);
 
                         $mailRequired = true;
+
+                        Cart::query()
+                            ->where('user_id', $freshOrder->user_id)
+                            ->get()
+                            ->each(fn ($cart) => $cart->items()->delete());
                     }
 
                     Payment::updateOrCreate(
