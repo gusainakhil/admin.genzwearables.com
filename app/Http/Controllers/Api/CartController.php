@@ -66,18 +66,7 @@ class CartController extends Controller
                         'brand' => $product->brand,
                         'base_price' => $product->base_price,
                         'images' => $images,
-                        'reviews' => $product->reviews->map(function ($review) {
-                            return [
-                                'id' => $review->id,
-                                'rating' => $review->rating,
-                                'comment' => $review->comment,
-                                'user' => $review->user ? [
-                                    'id' => $review->user->id,
-                                    'name' => $review->user->name,
-                                ] : null,
-                                'created_at' => $review->created_at,
-                            ];
-                        }),
+                        'reviews' => $product->reviews->map(fn ($review) => $review->toApiArray()),
                     ] : null,
                 ] : null,
             ];
@@ -170,18 +159,7 @@ class CartController extends Controller
                         'gender' => $cartItem->productVariant->product->gender,
                         'is_custom' => (bool) $cartItem->productVariant->product->is_custom,
                         'status' => $cartItem->productVariant->product->status,
-                        'reviews' => $cartItem->productVariant->product->reviews->map(function ($review) {
-                            return [
-                                'id' => $review->id,
-                                'rating' => $review->rating,
-                                'comment' => $review->comment,
-                                'user' => $review->user ? [
-                                    'id' => $review->user->id,
-                                    'name' => $review->user->name,
-                                ] : null,
-                                'created_at' => $review->created_at,
-                            ];
-                        }),
+                        'reviews' => $cartItem->productVariant->product->reviews->map(fn ($review) => $review->toApiArray()),
                     ] : null,
                 ] : null,
             ],
@@ -237,18 +215,7 @@ class CartController extends Controller
                         'gender' => $item->productVariant->product->gender,
                         'is_custom' => (bool) $item->productVariant->product->is_custom,
                         'status' => $item->productVariant->product->status,
-                        'reviews' => $item->productVariant->product->reviews->map(function ($review) {
-                            return [
-                                'id' => $review->id,
-                                'rating' => $review->rating,
-                                'comment' => $review->comment,
-                                'user' => $review->user ? [
-                                    'id' => $review->user->id,
-                                    'name' => $review->user->name,
-                                ] : null,
-                                'created_at' => $review->created_at,
-                            ];
-                        }),
+                        'reviews' => $item->productVariant->product->reviews->map(fn ($review) => $review->toApiArray()),
                     ] : null,
                 ] : null,
             ],

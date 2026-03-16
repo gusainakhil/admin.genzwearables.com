@@ -3,11 +3,13 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Api\StoreReviewRequest;
 use App\Http\Requests\Api\UpdateReviewRequest;
 use App\Models\Category;
 use App\Models\Product;
 use App\Models\Review;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class ProductController extends Controller
 {
@@ -129,18 +131,7 @@ class ProductController extends Controller
             ->where('product_id', $product->id)
             ->latest()
             ->get()
-            ->map(function (Review $review) {
-                return [
-                    'id' => $review->id,
-                    'rating' => $review->rating,
-                    'comment' => $review->comment,
-                    'user' => $review->user ? [
-                        'id' => $review->user->id,
-                        'name' => $review->user->name,
-                    ] : null,
-                    'created_at' => $review->created_at,
-                ];
-            });
+            ->map(fn (Review $review) => $review->toApiArray());
 
         return response()->json([
             'status' => true,
@@ -148,7 +139,7 @@ class ProductController extends Controller
         ]);
     }
 
-    public function storeReview(Request $request, Product $product)
+    public function storeReview(StoreReviewRequest $request, Product $product)
     {
         if ($product->status !== 'active') {
             return response()->json([
@@ -157,22 +148,20 @@ class ProductController extends Controller
             ], 404);
         }
 
-        $validated = $request->validate([
-            'rating' => 'required|integer|min:1|max:5',
-            'comment' => 'nullable|string|max:2000',
-        ]);
+        $validated = $request->validated();
 
         $review = Review::create([
             'product_id' => $product->id,
             'user_id' => $request->user()->id,
             'rating' => $validated['rating'],
             'comment' => $validated['comment'] ?? null,
+            'images' => $this->storeReviewImages($request),
         ]);
 
         return response()->json([
             'status' => true,
             'message' => 'Review submitted',
-            'data' => $review,
+            'data' => $review->load('user')->toApiArray(),
         ], 201);
     }
 
@@ -185,12 +174,19 @@ class ProductController extends Controller
             ], 404);
         }
 
-        $review->update($request->validated());
+        $validated = $request->validated();
+
+        if ($request->hasFile('images')) {
+            Storage::disk('public')->delete($review->images ?? []);
+            $validated['images'] = $this->storeReviewImages($request);
+        }
+
+        $review->update($validated);
 
         return response()->json([
             'status' => true,
             'message' => 'Review updated',
-            'data' => $review->fresh(),
+            'data' => $review->fresh('user')->toApiArray(),
         ]);
     }
 
@@ -312,20 +308,23 @@ class ProductController extends Controller
         }
 
         if ($includeReviews) {
-            $data['reviews'] = $product->reviews->map(function ($review) {
-                return [
-                    'id' => $review->id,
-                    'rating' => $review->rating,
-                    'comment' => $review->comment,
-                    'user' => $review->user ? [
-                        'id' => $review->user->id,
-                        'name' => $review->user->name,
-                    ] : null,
-                    'created_at' => $review->created_at,
-                ];
-            });
+            $data['reviews'] = $product->reviews->map(fn (Review $review) => $review->toApiArray());
         }
 
         return $data;
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    private function storeReviewImages(Request $request): array
+    {
+        $imagePaths = [];
+
+        foreach ($request->file('images', []) as $image) {
+            $imagePaths[] = $image->store('reviews', 'public');
+        }
+
+        return $imagePaths;
     }
 }

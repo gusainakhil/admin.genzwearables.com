@@ -2,26 +2,16 @@
 
 namespace App\Http\Requests\Api;
 
-use App\Models\Product;
-use App\Models\Review;
 use Illuminate\Foundation\Http\FormRequest;
 
-class UpdateReviewRequest extends FormRequest
+class StoreReviewRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
      */
     public function authorize(): bool
     {
-        $product = $this->route('product');
-        $review = $this->route('review');
-
-        if (! $product instanceof Product || ! $review instanceof Review) {
-            return false;
-        }
-
-        return $this->user()?->id === $review->user_id
-            && $review->product_id === $product->id;
+        return $this->user() !== null;
     }
 
     /**
@@ -32,9 +22,9 @@ class UpdateReviewRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'rating' => 'sometimes|integer|min:1|max:5',
-            'comment' => 'sometimes|nullable|string|max:2000',
-            'images' => 'sometimes|array|max:6',
+            'rating' => 'required|integer|min:1|max:5',
+            'comment' => 'nullable|string|max:2000',
+            'images' => 'nullable|array|max:6',
             'images.*' => 'required|image|max:5120',
         ];
     }

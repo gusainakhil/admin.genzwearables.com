@@ -5,9 +5,57 @@ use App\Models\Product;
 use App\Models\Review;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Laravel\Sanctum\Sanctum;
 
 uses(RefreshDatabase::class);
+
+it('allows a user to replace their review images', function () {
+    Storage::fake('public');
+
+    $user = User::factory()->create();
+    $product = createActiveProduct();
+
+    $existingImage = UploadedFile::fake()->image('existing-review.jpg')->store('reviews', 'public');
+
+    $review = Review::query()->create([
+        'product_id' => $product->id,
+        'user_id' => $user->id,
+        'rating' => 3,
+        'comment' => 'Initial comment',
+        'images' => [$existingImage],
+    ]);
+
+    Sanctum::actingAs($user);
+
+    $response = $this->patch("/api/products/{$product->id}/reviews/{$review->id}", [
+        'rating' => 5,
+        'comment' => 'Updated comment',
+        'images' => [
+            UploadedFile::fake()->image('updated-review-1.jpg'),
+            UploadedFile::fake()->image('updated-review-2.jpg'),
+        ],
+    ], [
+        'Accept' => 'application/json',
+    ]);
+
+    $response
+        ->assertSuccessful()
+        ->assertJsonPath('status', true)
+        ->assertJsonPath('message', 'Review updated')
+        ->assertJsonPath('data.rating', 5)
+        ->assertJsonPath('data.comment', 'Updated comment')
+        ->assertJsonCount(2, 'data.images');
+
+    Storage::disk('public')->assertMissing($existingImage);
+
+    foreach (($response->json('data.images') ?? []) as $image) {
+        Storage::disk('public')->assertExists($image['path']);
+    }
+
+    expect($review->fresh()->images)->toHaveCount(2);
+});
 
 it('allows a user to update their own review', function () {
     $user = User::factory()->create();
