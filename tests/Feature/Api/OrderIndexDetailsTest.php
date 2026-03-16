@@ -264,6 +264,8 @@ class OrderIndexDetailsTest extends TestCase
         $this->assertStringContainsString('invoice-ORD-INVOICE-1004.html', $contentDisposition);
         $this->assertStringContainsString('Tax Invoice', $response->streamedContent());
         $this->assertStringContainsString('ORD-INVOICE-1004', $response->streamedContent());
+        $this->assertStringNotContainsString('Back to Order', $response->streamedContent());
+        $this->assertStringNotContainsString('/admin/orders/', $response->streamedContent());
     }
 
     public function test_user_can_download_invoice_using_order_number_reference(): void
@@ -294,6 +296,8 @@ class OrderIndexDetailsTest extends TestCase
         $this->assertStringContainsString('attachment;', $contentDisposition);
         $this->assertStringContainsString('invoice-ORD-4N2VOJWMWJ.html', $contentDisposition);
         $this->assertStringContainsString('ORD-4N2VOJWMWJ', $response->streamedContent());
+        $this->assertStringNotContainsString('Back to Order', $response->streamedContent());
+        $this->assertStringNotContainsString('/admin/orders/', $response->streamedContent());
     }
 
     public function test_user_cannot_download_other_user_order_invoice(): void

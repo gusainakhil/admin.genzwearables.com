@@ -80,8 +80,9 @@ class OrderController extends Controller
     {
         $order->load('user', 'address', 'items.product', 'items.variant.size', 'items.variant.color', 'payment', 'shipment');
         $companyDetail = CompanyDetail::query()->first();
+        $showBackToOrder = true;
 
-        return view('admin.orders.print-invoice', compact('order', 'companyDetail'));
+        return view('admin.orders.print-invoice', compact('order', 'companyDetail', 'showBackToOrder'));
     }
 
     public function printParcelSheet(Order $order)

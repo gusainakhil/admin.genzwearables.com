@@ -215,9 +215,10 @@ class OrderController extends Controller
 
         $order->load('user', 'address', 'items.product', 'items.variant.size', 'items.variant.color', 'payment', 'shipment');
         $companyDetail = CompanyDetail::query()->first();
+        $showBackToOrder = false;
 
         $fileName = 'invoice-'.$order->order_number.'.html';
-        $html = view('admin.orders.print-invoice', compact('order', 'companyDetail'))->render();
+        $html = view('admin.orders.print-invoice', compact('order', 'companyDetail', 'showBackToOrder'))->render();
 
         return response()->streamDownload(function () use ($html): void {
             echo $html;

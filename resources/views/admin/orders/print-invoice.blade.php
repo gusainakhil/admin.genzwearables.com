@@ -131,7 +131,9 @@
 
     <div class="actions">
         <button type="button" onclick="window.print()">Print Invoice</button>
-        <a href="{{ route('admin.orders.show', $order) }}">Back to Order</a>
+        @if($showBackToOrder ?? false)
+            <a href="{{ route('admin.orders.show', $order) }}">Back to Order</a>
+        @endif
     </div>
 
     <div class="header">
