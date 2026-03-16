@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\PolicyPageController as AdminPolicyPageController;
 use App\Http\Controllers\Admin\ProductController;
+use App\Http\Controllers\Admin\ReturnRequestController;
 use App\Http\Controllers\Admin\ReviewController;
 use App\Http\Controllers\Admin\SidebarBannerController;
 use App\Http\Controllers\Admin\SettingsController;
@@ -76,6 +77,9 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin:admin,staff']
         // Reviews
         Route::get('reviews', [ReviewController::class, 'index'])->name('reviews.index');
         Route::delete('reviews/{review}', [ReviewController::class, 'destroy'])->name('reviews.destroy');
+
+        // Return Requests
+        Route::get('return-requests', [ReturnRequestController::class, 'index'])->name('return-requests.index');
 
         // Settings
         Route::get('settings', [SettingsController::class, 'index'])->name('settings.index');

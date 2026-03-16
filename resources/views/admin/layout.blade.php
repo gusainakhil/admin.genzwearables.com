@@ -123,6 +123,13 @@
                     </span>
                     Reviews
                 </a>
+
+                <a href="{{ route('admin.return-requests.index') }}" class="sidebar-link flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold tracking-wide text-stone-200 transition hover:bg-white/10 hover:text-white {{ request()->routeIs('admin.return-requests.*') ? 'active' : '' }}">
+                    <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-white/5">
+                        <i class="fas fa-rotate-left"></i>
+                    </span>
+                    Return Requests
+                </a>
                 
                 <a href="{{ route('admin.settings.index') }}" class="sidebar-link flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold tracking-wide text-stone-200 transition hover:bg-white/10 hover:text-white {{ request()->routeIs('admin.settings.*') ? 'active' : '' }}">
                     <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-white/5">
