@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\PaymentController;
 use App\Http\Controllers\Api\CompanyDetailController;
 use App\Http\Controllers\Api\PolicyPageController;
 use App\Http\Controllers\Api\ProductController;
+use App\Http\Controllers\Api\ReturnRequestController;
 use App\Http\Controllers\Api\SidebarBannerController;
 use App\Http\Controllers\Api\ShipmentController;
 use App\Http\Controllers\Api\UserAddressController;
@@ -72,3 +73,4 @@ Route::middleware('auth:sanctum')->get('/orders/{order}', [OrderController::clas
 Route::middleware('auth:sanctum')->get('/orders/{orderReference}/invoice/download', [OrderController::class, 'downloadInvoice']);
 Route::middleware('auth:sanctum')->patch('/orders/{order}/payment', [OrderController::class, 'updatePayment']);
 Route::middleware('auth:sanctum')->post('/orders/payment/sync', [OrderController::class, 'syncRazorpayPayment']);
+Route::middleware('auth:sanctum')->post('/returns', [ReturnRequestController::class, 'store']);

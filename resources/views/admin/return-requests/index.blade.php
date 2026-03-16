@@ -10,14 +10,15 @@
             <tr>
                 <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-stone-500">Request ID</th>
                 <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-stone-500">Order</th>
-                <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-stone-500">Customer</th>
-                <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-stone-500">Product</th>
+               
+                <!-- <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-stone-500">Product</th> -->
                 <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-stone-500">Type</th>
-                <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-stone-500">Variant</th>
-                <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-stone-500">Images</th>
-                <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-stone-500">Reason</th>
+                <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-stone-500">Requested By</th>
+                <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-stone-500">Tracking ID</th>
+                <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-stone-500">Courier</th>
                 <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-stone-500">Status</th>
-                <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-stone-500">Requested On</th>
+
+                <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-stone-500">Actions</th>
             </tr>
         </thead>
         <tbody class="divide-y divide-rose-100/70">
@@ -33,18 +34,23 @@
                 <tr class="transition hover:bg-rose-50/60">
                     <td class="px-6 py-4 whitespace-nowrap text-stone-600">#{{ $request->id }}</td>
                     <td class="px-6 py-4 whitespace-nowrap font-semibold text-stone-900">{{ $request->orderItem?->order?->order_number ?? '-' }}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-stone-600">{{ $request->orderItem?->order?->user?->name ?? '-' }}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-stone-600">{{ $request->orderItem?->product?->name ?? '-' }}</td>
+
+                    <!-- <td class="px-6 py-4 whitespace-nowrap text-stone-600">{{ $request->orderItem?->product?->name ?? '-' }}</td> -->
                     <td class="px-6 py-4 whitespace-nowrap text-stone-600">{{ ucfirst($request->request_type ?? 'return') }}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-stone-600">{{ $request->productVariant?->sku ?? '-' }}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-stone-600">{{ count($request->product_images ?? []) }}</td>
-                    <td class="px-6 py-4 text-stone-600">{{ $request->reason ?: 'No reason provided' }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-stone-600">{{ $request->requested_by ? ucfirst($request->requested_by) : '-' }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-stone-600">{{ $request->tracking_id ?? '-' }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-stone-600">{{ $request->courier_name ?? '-' }}</td>
                     <td class="px-6 py-4 whitespace-nowrap">
                         <span class="inline-flex rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wide {{ $statusClasses[$request->status] ?? 'bg-stone-100 text-stone-600' }}">
                             {{ $request->status }}
                         </span>
                     </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-stone-500">{{ $request->created_at?->format('M d, Y h:i A') ?? '-' }}</td>
+
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <a href="{{ route('admin.return-requests.show', $request) }}" class="inline-flex items-center rounded-full border border-rose-200/70 bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-stone-600 transition hover:border-rose-300 hover:text-stone-800">
+                            View
+                        </a>
+                    </td>
                 </tr>
             @empty
                 <tr>

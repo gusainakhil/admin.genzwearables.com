@@ -80,6 +80,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin:admin,staff']
 
         // Return Requests
         Route::get('return-requests', [ReturnRequestController::class, 'index'])->name('return-requests.index');
+        Route::get('return-requests/{returnRequest}', [ReturnRequestController::class, 'show'])->name('return-requests.show');
+        Route::patch('return-requests/{returnRequest}', [ReturnRequestController::class, 'update'])->name('return-requests.update');
 
         // Settings
         Route::get('settings', [SettingsController::class, 'index'])->name('settings.index');

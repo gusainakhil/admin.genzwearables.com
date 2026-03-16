@@ -12,7 +12,11 @@ class ReturnRequest extends Model
     protected $fillable = [
         'order_item_id',
         'request_type',
+        'requested_by',
         'product_variant_id',
+        'tracking_id',
+        'courier_name',
+        'link',
         'product_images',
         'reason',
         'status',
