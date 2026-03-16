@@ -194,6 +194,54 @@ class ProductController extends Controller
         ]);
     }
 
+    public function search(Request $request): \Illuminate\Http\JsonResponse
+    {
+        $query = trim((string) $request->query('q', ''));
+
+        if ($query === '') {
+            return response()->json([
+                'status' => false,
+                'message' => 'Search query is required.',
+            ], 422);
+        }
+
+        $products = Product::query()
+            ->where('status', 'active')
+            ->where(function ($q) use ($query) {
+                $q->where('name', 'like', "%{$query}%")
+                    ->orWhere('short_description', 'like', "%{$query}%")
+                    ->orWhere('brand', 'like', "%{$query}%");
+            })
+            ->with([
+                'images' => function ($q) {
+                    $q->where('is_primary', true)->orderByDesc('is_primary');
+                },
+            ])
+            ->limit(10)
+            ->get()
+            ->map(function (Product $product) {
+                $primaryImage = $product->images->first();
+
+                return [
+                    'id' => $product->id,
+                    'name' => $product->name,
+                    'slug' => $product->slug,
+                    'brand' => $product->brand,
+                    'base_price' => $product->base_price,
+                    'short_description' => $product->short_description,
+                    'image' => $primaryImage ? [
+                        'url' => asset('storage/'.$primaryImage->image),
+                        'path' => $primaryImage->image,
+                    ] : null,
+                ];
+            });
+
+        return response()->json([
+            'status' => true,
+            'data' => $products,
+        ]);
+    }
+
     private function transformProduct(Product $product, bool $includeVariants = false, bool $includeReviews = false): array
     {
         $images = $product->images->map(function ($image) {
