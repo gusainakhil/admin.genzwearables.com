@@ -69,8 +69,11 @@ Route::middleware('auth:sanctum')->delete('/addresses/{address}', [UserAddressCo
 
 Route::middleware('auth:sanctum')->post('/orders/checkout', [OrderController::class, 'store']);
 Route::middleware('auth:sanctum')->get('/orders', [OrderController::class, 'index']);
+Route::middleware('auth:sanctum')->get('/orders/{order}/returns', [ReturnRequestController::class, 'orderReturns']);
 Route::middleware('auth:sanctum')->get('/orders/{order}', [OrderController::class, 'show']);
 Route::middleware('auth:sanctum')->get('/orders/{orderReference}/invoice/download', [OrderController::class, 'downloadInvoice']);
 Route::middleware('auth:sanctum')->patch('/orders/{order}/payment', [OrderController::class, 'updatePayment']);
 Route::middleware('auth:sanctum')->post('/orders/payment/sync', [OrderController::class, 'syncRazorpayPayment']);
+Route::middleware('auth:sanctum')->get('/returns', [ReturnRequestController::class, 'index']);
+Route::middleware('auth:sanctum')->get('/returns/{returnRequest}', [ReturnRequestController::class, 'show']);
 Route::middleware('auth:sanctum')->post('/returns', [ReturnRequestController::class, 'store']);
