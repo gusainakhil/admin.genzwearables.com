@@ -207,12 +207,16 @@ class ProductController extends Controller
 
         $products = Product::query()
             ->where('status', 'active')
-            ->where(function ($q) use ($query) {
-                $q->where('name', 'like', "%{$query}%")
-                    ->orWhere('short_description', 'like', "%{$query}%")
-                    ->orWhere('brand', 'like', "%{$query}%");
+            ->whereHas('category', function ($categoryQuery) use ($query) {
+                $categoryQuery
+                    ->where(function ($q) use ($query) {
+                        $q->where('name', 'like', "%{$query}%")
+                            ->orWhere('slug', 'like', "%{$query}%");
+                    })
+                    ->where('status', 'active');
             })
             ->with([
+                'category',
                 'images' => function ($q) {
                     $q->where('is_primary', true)->orderByDesc('is_primary');
                 },
@@ -229,6 +233,11 @@ class ProductController extends Controller
                     'brand' => $product->brand,
                     'base_price' => $product->base_price,
                     'short_description' => $product->short_description,
+                    'category' => $product->category ? [
+                        'id' => $product->category->id,
+                        'name' => $product->category->name,
+                        'slug' => $product->category->slug,
+                    ] : null,
                     'image' => $primaryImage ? [
                         'url' => asset('storage/'.$primaryImage->image),
                         'path' => $primaryImage->image,
