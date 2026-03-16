@@ -348,7 +348,7 @@ class OrderController extends Controller
 
             $order->refresh()->load('user');
 
-            if ($mailRequired && $order->user) {
+            if ($mailRequired && $this->shouldSendOrderMail($order)) {
                 Mail::to($order->user->email)->send(new OrderPaid($order));
             }
 
@@ -584,7 +584,10 @@ class OrderController extends Controller
         });
 
         $order->load('user');
-        Mail::to($order->user->email)->send(new OrderPlaced($order));
+
+        if ($this->shouldSendOrderMail($order)) {
+            Mail::to($order->user->email)->send(new OrderPlaced($order));
+        }
 
         return response()->json([
             'status' => true,
@@ -697,7 +700,7 @@ class OrderController extends Controller
             throw $exception;
         }
 
-        if ($validated['payment_status'] === 'paid') {
+        if ($validated['payment_status'] === 'paid' && $this->shouldSendOrderMail($order)) {
             Mail::to($order->user->email)->send(new OrderPaid($order));
         }
 
@@ -855,7 +858,7 @@ class OrderController extends Controller
 
             $order->refresh()->load('user');
 
-            if ($mailRequired && $order->user) {
+            if ($mailRequired && $this->shouldSendOrderMail($order)) {
                 Mail::to($order->user->email)->send(new OrderPaid($order));
             }
 
@@ -1032,5 +1035,16 @@ class OrderController extends Controller
         }
 
         return $payload;
+    }
+
+    private function shouldSendOrderMail(Order $order): bool
+    {
+        $email = $order->user?->email;
+
+        if (! is_string($email) || trim($email) === '') {
+            return false;
+        }
+
+        return filter_var($email, FILTER_VALIDATE_EMAIL) !== false;
     }
 }
