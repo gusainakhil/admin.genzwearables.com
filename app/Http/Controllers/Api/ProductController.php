@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Api\DeleteReviewRequest;
 use App\Http\Requests\Api\StoreReviewRequest;
 use App\Http\Requests\Api\UpdateReviewRequest;
 use App\Models\Category;
@@ -187,6 +188,24 @@ class ProductController extends Controller
             'status' => true,
             'message' => 'Review updated',
             'data' => $review->fresh('user')->toApiArray(),
+        ]);
+    }
+
+    public function destroyReview(DeleteReviewRequest $request, Product $product, Review $review)
+    {
+        if ($product->status !== 'active') {
+            return response()->json([
+                'status' => false,
+                'message' => 'Product not found',
+            ], 404);
+        }
+
+        Storage::disk('public')->delete($review->images ?? []);
+        $review->delete();
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Review deleted',
         ]);
     }
 
