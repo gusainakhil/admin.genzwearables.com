@@ -82,41 +82,20 @@
                     Staff
                 </a>
 
-                <a href="{{ route('admin.categories.index') }}" class="sidebar-link flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold tracking-wide text-stone-200 transition hover:bg-white/10 hover:text-white {{ request()->routeIs('admin.categories.*') ? 'active' : '' }}">
-                    <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-white/5">
-                        <i class="fas fa-folder"></i>
-                    </span>
-                    Categories
-                </a>
-                
                 <a href="{{ route('admin.customers.index') }}" class="sidebar-link flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold tracking-wide text-stone-200 transition hover:bg-white/10 hover:text-white {{ request()->routeIs('admin.customers.*') ? 'active' : '' }}">
                     <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-white/5">
                         <i class="fas fa-users"></i>
                     </span>
                     Customers
                 </a>
-                
+
                 <a href="{{ route('admin.coupons.index') }}" class="sidebar-link flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold tracking-wide text-stone-200 transition hover:bg-white/10 hover:text-white {{ request()->routeIs('admin.coupons.*') ? 'active' : '' }}">
                     <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-white/5">
                         <i class="fas fa-tag"></i>
                     </span>
                     Coupons
                 </a>
-                
-                <a href="{{ route('admin.sizes.index') }}" class="sidebar-link flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold tracking-wide text-stone-200 transition hover:bg-white/10 hover:text-white {{ request()->routeIs('admin.sizes.*') ? 'active' : '' }}">
-                    <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-white/5">
-                        <i class="fas fa-ruler"></i>
-                    </span>
-                    Sizes
-                </a>
-                
-                <a href="{{ route('admin.colors.index') }}" class="sidebar-link flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold tracking-wide text-stone-200 transition hover:bg-white/10 hover:text-white {{ request()->routeIs('admin.colors.*') ? 'active' : '' }}">
-                    <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-white/5">
-                        <i class="fas fa-palette"></i>
-                    </span>
-                    Colors
-                </a>
-                
+
                 <a href="{{ route('admin.reviews.index') }}" class="sidebar-link flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold tracking-wide text-stone-200 transition hover:bg-white/10 hover:text-white {{ request()->routeIs('admin.reviews.*') ? 'active' : '' }}">
                     <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-white/5">
                         <i class="fas fa-star"></i>
@@ -124,13 +103,6 @@
                     Reviews
                 </a>
 
-                <a href="{{ route('admin.return-requests.index') }}" class="sidebar-link flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold tracking-wide text-stone-200 transition hover:bg-white/10 hover:text-white {{ request()->routeIs('admin.return-requests.*') ? 'active' : '' }}">
-                    <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-white/5">
-                        <i class="fas fa-rotate-left"></i>
-                    </span>
-                    Return Requests
-                </a>
-                
                 <a href="{{ route('admin.settings.index') }}" class="sidebar-link flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold tracking-wide text-stone-200 transition hover:bg-white/10 hover:text-white {{ request()->routeIs('admin.settings.*') ? 'active' : '' }}">
                     <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-white/5">
                         <i class="fas fa-cog"></i>
@@ -159,6 +131,34 @@
                     Sidebar Banners
                 </a>
                 @endif
+
+                <a href="{{ route('admin.categories.index') }}" class="sidebar-link flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold tracking-wide text-stone-200 transition hover:bg-white/10 hover:text-white {{ request()->routeIs('admin.categories.*') ? 'active' : '' }}">
+                    <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-white/5">
+                        <i class="fas fa-folder"></i>
+                    </span>
+                    Categories
+                </a>
+                
+                <a href="{{ route('admin.sizes.index') }}" class="sidebar-link flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold tracking-wide text-stone-200 transition hover:bg-white/10 hover:text-white {{ request()->routeIs('admin.sizes.*') ? 'active' : '' }}">
+                    <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-white/5">
+                        <i class="fas fa-ruler"></i>
+                    </span>
+                    Sizes
+                </a>
+                
+                <a href="{{ route('admin.colors.index') }}" class="sidebar-link flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold tracking-wide text-stone-200 transition hover:bg-white/10 hover:text-white {{ request()->routeIs('admin.colors.*') ? 'active' : '' }}">
+                    <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-white/5">
+                        <i class="fas fa-palette"></i>
+                    </span>
+                    Colors
+                </a>
+
+                <a href="{{ route('admin.return-requests.index') }}" class="sidebar-link flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold tracking-wide text-stone-200 transition hover:bg-white/10 hover:text-white {{ request()->routeIs('admin.return-requests.*') ? 'active' : '' }}">
+                    <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-white/5">
+                        <i class="fas fa-rotate-left"></i>
+                    </span>
+                    Return Requests
+                </a>
             </nav>
         </aside>
 

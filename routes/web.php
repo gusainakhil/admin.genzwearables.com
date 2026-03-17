@@ -51,12 +51,26 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin:admin,staff']
     Route::patch('orders/{order}/payment-status', [OrderController::class, 'updatePaymentStatus'])->name('orders.payment-status');
     Route::post('orders/{order}/shipment', [OrderController::class, 'addShipment'])->name('orders.shipment');
 
+    // Categories
+    Route::resource('categories', CategoryController::class);
+
+    // Attributes
+    Route::get('sizes', [AttributeController::class, 'sizesIndex'])->name('sizes.index');
+    Route::post('sizes', [AttributeController::class, 'storeSize'])->name('sizes.store');
+    Route::delete('sizes/{size}', [AttributeController::class, 'destroySize'])->name('sizes.destroy');
+
+    Route::get('colors', [AttributeController::class, 'colorsIndex'])->name('colors.index');
+    Route::post('colors', [AttributeController::class, 'storeColor'])->name('colors.store');
+    Route::delete('colors/{color}', [AttributeController::class, 'destroyColor'])->name('colors.destroy');
+
+    // Return Requests
+    Route::get('return-requests', [ReturnRequestController::class, 'index'])->name('return-requests.index');
+    Route::get('return-requests/{returnRequest}', [ReturnRequestController::class, 'show'])->name('return-requests.show');
+    Route::patch('return-requests/{returnRequest}', [ReturnRequestController::class, 'update'])->name('return-requests.update');
+
     Route::middleware('admin:admin')->group(function () {
         // Staff
         Route::resource('staff', StaffController::class)->except(['show']);
-
-        // Categories
-        Route::resource('categories', CategoryController::class);
 
         // Customers
         Route::resource('customers', CustomerController::class)->only(['index', 'show']);
@@ -65,23 +79,9 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin:admin,staff']
         // Coupons
         Route::resource('coupons', CouponController::class);
 
-        // Attributes
-        Route::get('sizes', [AttributeController::class, 'sizesIndex'])->name('sizes.index');
-        Route::post('sizes', [AttributeController::class, 'storeSize'])->name('sizes.store');
-        Route::delete('sizes/{size}', [AttributeController::class, 'destroySize'])->name('sizes.destroy');
-
-        Route::get('colors', [AttributeController::class, 'colorsIndex'])->name('colors.index');
-        Route::post('colors', [AttributeController::class, 'storeColor'])->name('colors.store');
-        Route::delete('colors/{color}', [AttributeController::class, 'destroyColor'])->name('colors.destroy');
-
         // Reviews
         Route::get('reviews', [ReviewController::class, 'index'])->name('reviews.index');
         Route::delete('reviews/{review}', [ReviewController::class, 'destroy'])->name('reviews.destroy');
-
-        // Return Requests
-        Route::get('return-requests', [ReturnRequestController::class, 'index'])->name('return-requests.index');
-        Route::get('return-requests/{returnRequest}', [ReturnRequestController::class, 'show'])->name('return-requests.show');
-        Route::patch('return-requests/{returnRequest}', [ReturnRequestController::class, 'update'])->name('return-requests.update');
 
         // Settings
         Route::get('settings', [SettingsController::class, 'index'])->name('settings.index');

@@ -73,4 +73,35 @@ class AdminDashboardAccessTest extends TestCase
 
         $response->assertRedirect('/admin');
     }
+
+    public function test_staff_user_can_access_categories_sizes_colors_and_return_requests_pages(): void
+    {
+        $staff = User::factory()->create([
+            'role' => 'staff',
+            'status' => 'active',
+        ]);
+
+        $this->actingAs($staff)->get(route('admin.categories.index'))->assertOk();
+        $this->actingAs($staff)->get(route('admin.sizes.index'))->assertOk();
+        $this->actingAs($staff)->get(route('admin.colors.index'))->assertOk();
+        $this->actingAs($staff)->get(route('admin.return-requests.index'))->assertOk();
+    }
+
+    public function test_staff_user_sees_expected_sidebar_links(): void
+    {
+        $staff = User::factory()->create([
+            'role' => 'staff',
+            'status' => 'active',
+        ]);
+
+        $response = $this->actingAs($staff)->get('/admin');
+
+        $response
+            ->assertOk()
+            ->assertSee('Categories')
+            ->assertSee('Sizes')
+            ->assertSee('Colors')
+            ->assertSee('Return Requests')
+            ->assertDontSee('Staff');
+    }
 }
