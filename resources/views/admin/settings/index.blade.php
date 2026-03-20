@@ -18,17 +18,17 @@
     @endif
 
     <!-- Payment Gateway Settings -->
-    <div class="rounded-[28px] border border-rose-200/60 bg-white shadow-sm p-8">
+    <!-- <div class="rounded-[28px] border border-rose-200/60 bg-white shadow-sm p-8">
         <div class="mb-6">
             <h3 class="text-2xl font-semibold text-stone-900 mb-2">Payment Gateway</h3>
             <p class="text-sm text-stone-500">Configure Razorpay payment gateway settings for your store</p>
         </div>
 
         <form action="{{ route('admin.settings.update') }}" method="POST" class="space-y-6">
-            @csrf
+            @csrf -->
 
             <!-- Razorpay Status -->
-            <div class="rounded-2xl border border-rose-100/70 bg-stone-50/50 p-6">
+            <!-- <div class="rounded-2xl border border-rose-100/70 bg-stone-50/50 p-6">
                 <div class="flex items-center justify-between">
                     <div>
                         <label class="block text-sm font-semibold text-stone-900 mb-1">Enable Razorpay</label>
@@ -39,10 +39,11 @@
                         <div class="peer h-7 w-14 rounded-full bg-stone-300 after:absolute after:left-1 after:top-1 after:h-5 after:w-5 after:rounded-full after:border after:border-stone-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-gradient-to-r peer-checked:from-rose-500 peer-checked:to-amber-500 peer-checked:after:translate-x-7 peer-checked:after:border-white peer-focus:ring-4 peer-focus:ring-rose-200/50"></div>
                     </label>
                 </div>
-            </div>
+            </div> -->
 
             <!-- Razorpay Key ID -->
-            <div>
+
+            <!-- <div>
                 <label class="block text-sm font-semibold uppercase tracking-wider text-stone-500 mb-3">
                     <i class="fas fa-key text-rose-500 mr-2"></i>Razorpay Key ID
                 </label>
@@ -60,10 +61,10 @@
                     <i class="fas fa-info-circle mr-1"></i>
                     Your Razorpay Key ID (starts with rzp_test_ or rzp_live_)
                 </p>
-            </div>
+            </div> -->
 
             <!-- Razorpay Key Secret -->
-            <div>
+            <!-- <div>
                 <label class="block text-sm font-semibold uppercase tracking-wider text-stone-500 mb-3">
                     <i class="fas fa-lock text-rose-500 mr-2"></i>Razorpay Key Secret
                 </label>
@@ -81,10 +82,10 @@
                     <i class="fas fa-info-circle mr-1"></i>
                     Keep this secret safe and never share it publicly
                 </p>
-            </div>
+            </div> -->
 
             <!-- Info Box -->
-            <div class="rounded-2xl border border-amber-200/60 bg-amber-50/50 p-6">
+            <!-- <div class="rounded-2xl border border-amber-200/60 bg-amber-50/50 p-6">
                 <div class="flex gap-4">
                     <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-500 text-white">
                         <i class="fas fa-lightbulb"></i>
@@ -99,10 +100,10 @@
                         </ol>
                     </div>
                 </div>
-            </div>
+            </div> -->
 
             <!-- Action Buttons -->
-            <div class="flex flex-wrap gap-4 pt-4">
+            <!-- <div class="flex flex-wrap gap-4 pt-4">
                 <button 
                     type="submit" 
                     class="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-rose-500 to-amber-500 px-8 py-3 text-sm font-semibold uppercase tracking-[0.2em] text-white shadow-sm transition hover:from-rose-600 hover:to-amber-600 hover:shadow-md focus:outline-none focus:ring-4 focus:ring-rose-200/50"
@@ -119,10 +120,10 @@
                 </a>
             </div>
         </form>
-    </div>
+    </div> -->
 
     <!-- OTP Settings (Authkey) -->
-    <div class="rounded-[28px] border border-rose-200/60 bg-white shadow-sm p-8">
+    <!-- <div class="rounded-[28px] border border-rose-200/60 bg-white shadow-sm p-8">
         <div class="mb-6">
             <h3 class="text-2xl font-semibold text-stone-900 mb-2">OTP Settings</h3>
             <p class="text-sm text-stone-500">Configure Authkey API key for OTP and SMS integration</p>
@@ -200,9 +201,9 @@
                         </ol>
                     </div>
                 </div>
-            </div>
+            </div> -->
 
-            <div class="flex flex-wrap gap-4 pt-2">
+            <!-- <div class="flex flex-wrap gap-4 pt-2">
                 <button
                     type="submit"
                     class="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-rose-500 to-amber-500 px-8 py-3 text-sm font-semibold uppercase tracking-[0.2em] text-white shadow-sm transition hover:from-rose-600 hover:to-amber-600 hover:shadow-md focus:outline-none focus:ring-4 focus:ring-rose-200/50"
@@ -212,10 +213,10 @@
                 </button>
             </div>
         </form>
-    </div>
+    </div> -->
 
     <!-- SMTP Email Settings -->
-    <div class="rounded-[28px] border border-rose-200/60 bg-white shadow-sm p-8">
+    <!-- <div class="rounded-[28px] border border-rose-200/60 bg-white shadow-sm p-8">
         <div class="mb-6">
             <h3 class="text-2xl font-semibold text-stone-900 mb-2">SMTP Email Settings</h3>
             <p class="text-sm text-stone-500">Configure SMTP for OTP email delivery</p>
@@ -368,10 +369,10 @@
                 </button>
             </div>
         </form>
-    </div>
+    </div> -->
 
     <!-- Shipment API Credentials -->
-    <div class="rounded-[28px] border border-rose-200/60 bg-white shadow-sm p-8">
+    <!-- <div class="rounded-[28px] border border-rose-200/60 bg-white shadow-sm p-8">
         <div class="mb-6">
             <h3 class="text-2xl font-semibold text-stone-900 mb-2">Shipment API (Shiprocket)</h3>
             <p class="text-sm text-stone-500">Configure Shiprocket API credentials for shipment booking and tracking.</p>
@@ -462,10 +463,10 @@
                 Generate Shiprocket Token
             </button>
         </form>
-    </div>
+    </div> -->
 
     <!-- Admin Password Settings -->
-    <div class="rounded-[28px] border border-rose-200/60 bg-white shadow-sm p-8">
+     <div class="rounded-[28px] border border-rose-200/60 bg-white shadow-sm p-8">
         <div class="mb-6">
             <h3 class="text-2xl font-semibold text-stone-900 mb-2">Admin Password</h3>
             <p class="text-sm text-stone-500">Update your own login password securely</p>
@@ -531,10 +532,10 @@
                 </button>
             </div>
         </form>
-    </div>
+    </div> 
 
     <!-- API Documentation -->
-    <div class="rounded-[28px] border border-rose-200/60 bg-white shadow-sm p-8">
+    <!-- <div class="rounded-[28px] border border-rose-200/60 bg-white shadow-sm p-8">
         <div class="mb-6">
             <h3 class="text-2xl font-semibold text-stone-900 mb-2">
                 <i class="fas fa-book text-rose-500 mr-2"></i>
@@ -608,6 +609,6 @@
                 </ul>
             </div>
         </div>
-    </div>
+    </div> -->
 </div>
 @endsection
